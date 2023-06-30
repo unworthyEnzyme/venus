@@ -1,4 +1,4 @@
-type Expression =
+export type Expression =
 	| { type: "NilLiteralExpression" }
 	| { type: "CallExpression"; callee: Expression; args: Expression[] }
 	| {
@@ -13,7 +13,7 @@ type Expression =
 			value: number;
 	  };
 
-type Statement =
+export type Statement =
 	| { type: "ReturnStatement"; expression: Expression }
 	| {
 			type: "FunctionDeclarationStatement";
