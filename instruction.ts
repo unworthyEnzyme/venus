@@ -1,6 +1,7 @@
 import type { Value } from "./value.ts";
 
 export type Instruction =
+	| { type: "Exit" }
 	| { type: "Jump"; offset: number }
 	| { type: "Spawn"; arity: number }
 	| { type: "Yield" }
