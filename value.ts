@@ -6,7 +6,6 @@ export type Value =
 	| { type: "Boolean"; value: boolean }
 	| {
 			type: "Function";
-			name: string;
 			body: Instruction[];
 			parameters: string[];
 	  };
