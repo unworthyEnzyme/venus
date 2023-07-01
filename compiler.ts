@@ -26,7 +26,11 @@ export class Compiler {
 						value: {
 							type: "Function",
 							parameters: statement.parameters,
-							body: this.compile(statement.body),
+							body: [
+								...this.compile(statement.body),
+								{ type: "Push", value: { type: "Nil" } },
+								{ type: "Return" },
+							],
 						},
 					});
 					instructions.push({
@@ -159,7 +163,11 @@ export class Compiler {
 					value: {
 						type: "Function",
 						parameters: expression.parameters,
-						body: this.compile(expression.body),
+						body: [
+							...this.compile(expression.body),
+							{ type: "Push", value: { type: "Nil" } },
+							{ type: "Return" },
+						],
 					},
 				});
 				break;
