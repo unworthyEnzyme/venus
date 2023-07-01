@@ -22,7 +22,7 @@ export type Statement =
 			parameters: string[];
 	  }
 	| { type: "SpawnStatement"; spawnee: Expression; args: Expression[] }
-	| { type: "YieldStatement"; expression: Expression }
+	| { type: "YieldStatement" }
 	| { type: "PrintStatement"; expression: Expression }
 	| { type: "WhileStatement"; condition: Expression; body: Statement[] }
 	| { type: "ExpressionStatement"; expression: Expression }
