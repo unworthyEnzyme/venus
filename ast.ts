@@ -1,4 +1,5 @@
 export type Expression =
+	| { type: "LambdaExpression"; body: Statement[]; parameters: string[] }
 	| { type: "NilLiteralExpression" }
 	| { type: "CallExpression"; callee: Expression; args: Expression[] }
 	| {
