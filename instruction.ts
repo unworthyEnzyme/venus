@@ -12,7 +12,7 @@ export type Instruction =
 	| { type: "BlockEnd" }
 	| { type: "BlockStart" }
 	| { type: "Return" }
-	| { type: "Call"; argCount: number }
+	| { type: "Call"; arity: number }
 	| { type: "GreaterThan" }
 	| { type: "LessThan" }
 	| { type: "Add" }
