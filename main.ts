@@ -2,6 +2,7 @@ import { Statement } from "./ast.ts";
 import { VM } from "./vm.ts";
 
 if (import.meta.main) {
+	//This example code is shamelessly copied from https://abhinavsarkar.net/posts/implementing-co-3/
 	// fun print_numbers(start, end) {
 	//     let i = start
 	//     while (i < end + 1) {
