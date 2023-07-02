@@ -21,16 +21,20 @@ export class Compiler {
 					break;
 				}
 				case "FunctionDeclarationStatement": {
+					const body = this.compile(statement.body);
+					const doesItHaveReturn = body.some(
+						(instruction) => instruction.type === "Return"
+					);
+					if (!doesItHaveReturn) {
+						body.push({ type: "Push", value: { type: "Nil" } });
+						body.push({ type: "Return" });
+					}
 					instructions.push({
 						type: "Push",
 						value: {
 							type: "Function",
 							parameters: statement.parameters,
-							body: [
-								...this.compile(statement.body),
-								{ type: "Push", value: { type: "Nil" } },
-								{ type: "Return" },
-							],
+							body: body,
 						},
 					});
 					instructions.push({
@@ -158,16 +162,21 @@ export class Compiler {
 				break;
 			}
 			case "LambdaExpression": {
+				const body = this.compile(expression.body);
+				const doesItHaveReturn = body.some(
+					(instruction) => instruction.type === "Return"
+				);
+				if (!doesItHaveReturn) {
+					body.push({ type: "Push", value: { type: "Nil" } });
+					body.push({ type: "Return" });
+				}
+
 				instructions.push({
 					type: "Push",
 					value: {
 						type: "Function",
 						parameters: expression.parameters,
-						body: [
-							...this.compile(expression.body),
-							{ type: "Push", value: { type: "Nil" } },
-							{ type: "Return" },
-						],
+						body: body,
 					},
 				});
 				break;
