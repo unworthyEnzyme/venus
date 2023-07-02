@@ -9,3 +9,16 @@ export type Value =
 			body: Instruction[];
 			parameters: string[];
 	  };
+
+export function toString(value: Value) {
+	switch (value.type) {
+		case "Nil":
+			return "nil";
+		case "Number":
+			return value.value.toString();
+		case "Boolean":
+			return value.value.toString();
+		case "Function":
+			return `<function ${value.parameters.join(", ")}>`;
+	}
+}
