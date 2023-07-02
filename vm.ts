@@ -93,21 +93,17 @@ export class VM {
 						break;
 					}
 					case "GetLocal": {
-						let value: Value | undefined;
-						for (let i = frame.locals.length - 1; i >= 0; i--) {
-							const locals = frame.locals.at(i)!;
-							value = locals.get(instruction.name);
-							if (value) {
-								break;
-							}
-						}
-						if (value) {
-							fiber.valueStack.push(value);
-							break;
-						}
-						throw new Error(
-							`Undefined variable ${instruction.name}`
+						const locals = frame.locals.find((locals) =>
+							locals.has(instruction.name)
 						);
+						if (locals === undefined) {
+							throw new Error(
+								`Undefined variable ${instruction.name}`
+							);
+						}
+						const value = locals.get(instruction.name)!;
+						fiber.valueStack.push(value);
+						break;
 					}
 					case "SetLocal": {
 						const value = fiber.valueStack.pop();
