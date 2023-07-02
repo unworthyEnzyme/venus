@@ -210,6 +210,8 @@ Deno.test("compiler_test", async (t) => {
 						body: [
 							{ type: "GetLocal", name: "x" },
 							{ type: "Print" },
+							{ type: "Push", value: { type: "Nil" } },
+							{ type: "Return" },
 						],
 					},
 				},
