@@ -1,6 +1,8 @@
 import type { Value } from "./value.ts";
 
 export type Instruction =
+  | { type: "ChannelReceive" }
+  | { type: "ChannelSend" }
   | { type: "Exit" }
   | { type: "Jump"; offset: number }
   | { type: "Spawn"; arity: number }

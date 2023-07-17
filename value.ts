@@ -1,6 +1,9 @@
+import type { Channel } from "./concurrency.ts";
 import type { Instruction } from "./instruction.ts";
 
 export type Value =
+  | { type: "Channel"; channel: Channel }
+  | { type: "NativeFunction"; fn: (...args: Value[]) => Value; arity: number }
   | { type: "Nil" }
   | { type: "Number"; value: number }
   | { type: "Boolean"; value: boolean }
@@ -20,5 +23,7 @@ export function toString(value: Value) {
       return value.value.toString();
     case "Function":
       return `<function ${value.parameters.join(", ")}>`;
+    case "Channel":
+      return `<channel>`;
   }
 }

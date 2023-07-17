@@ -1,10 +1,31 @@
 import { Statement } from "./ast.ts";
 import { Compiler } from "./compiler.ts";
+import { Channel } from "./concurrency.ts";
 import { Instruction } from "./instruction.ts";
 import { toString, Value } from "./value.ts";
 
 export class VM {
   private fiberQueue: Fiber[] = [];
+  private gloabals = new Map<string, Value>();
+  constructor() {
+    this.gloabals.set("meaning_of_life", {
+      type: "NativeFunction",
+      arity: 0,
+      fn: () => {
+        return { type: "Number", value: 42 };
+      },
+    });
+    this.gloabals.set("new_channel", {
+      type: "NativeFunction",
+      arity: 0,
+      fn: () => {
+        return {
+          type: "Channel",
+          channel: new Channel(),
+        };
+      },
+    });
+  }
   run(program: Statement[]) {
     const instructions = new Compiler().compile(program);
     const mainFiber = new Fiber([...instructions, { type: "Exit" }]);
@@ -20,6 +41,32 @@ export class VM {
         }
         const instruction = frame.instructions[frame.ip++];
         switch (instruction.type) {
+          case "ChannelSend": {
+            const channel = fiber.valueStack.pop();
+            const value = fiber.valueStack.pop();
+            if (channel?.type !== "Channel") {
+              throw new Error("Expected channel");
+            }
+            if (value === undefined) {
+              throw new Error("Expected value");
+            }
+            const blocked = channel.channel.send(this, fiber, value);
+            if (blocked) {
+              break executionLoop;
+            }
+            break;
+          }
+          case "ChannelReceive": {
+            const channel = fiber.valueStack.pop();
+            if (channel?.type !== "Channel") {
+              throw new Error("Expected channel");
+            }
+            const value = channel.channel.receive(fiber);
+            if (value === null) {
+              break executionLoop;
+            }
+            break;
+          }
           case "Exit": {
             return;
           }
@@ -98,6 +145,10 @@ export class VM {
               locals.has(instruction.name)
             );
             if (locals === undefined) {
+              if (this.gloabals.has(instruction.name)) {
+                fiber.valueStack.push(this.gloabals.get(instruction.name)!);
+                break;
+              }
               throw new Error(
                 `Undefined variable ${instruction.name}`,
               );
@@ -117,6 +168,10 @@ export class VM {
               locals.has(instruction.name)
             );
             if (locals === undefined) {
+              if (this.gloabals.has(instruction.name)) {
+                this.gloabals.set(instruction.name, value);
+                break;
+              }
               throw new Error(
                 `Undefined variable ${instruction.name}`,
               );
@@ -145,23 +200,36 @@ export class VM {
           }
           case "Call": {
             const callee = fiber.valueStack.pop();
-            if (callee?.type !== "Function") {
+            if (callee?.type === "Function") {
+              const locals = new Map<string, Value>();
+              const parameters = callee.parameters.toReversed();
+              for (const name of parameters) {
+                const arg = fiber.valueStack.pop();
+                if (arg === undefined) {
+                  throw new Error("Expected argument");
+                }
+                locals.set(name, arg);
+              }
+              fiber.stack.push({
+                ip: 0,
+                instructions: callee.body,
+                locals: [locals],
+              });
+            } else if (callee?.type === "NativeFunction") {
+              const args: Value[] = [];
+              for (let i = 0; i < instruction.arity; i++) {
+                const arg = fiber.valueStack.pop();
+                if (arg === undefined) {
+                  throw new Error("Expected argument");
+                }
+                args.push(arg);
+              }
+              const result = callee.fn(...args.toReversed());
+              fiber.valueStack.push(result);
+              break;
+            } else {
               throw new Error("Expected function");
             }
-            const locals = new Map<string, Value>();
-            const parameters = callee.parameters.toReversed();
-            for (const name of parameters) {
-              const arg = fiber.valueStack.pop();
-              if (arg === undefined) {
-                throw new Error("Expected argument");
-              }
-              locals.set(name, arg);
-            }
-            fiber.stack.push({
-              ip: 0,
-              instructions: callee.body,
-              locals: [locals],
-            });
             break;
           }
           case "Yield": {
@@ -191,9 +259,16 @@ export class VM {
       }
     }
   }
+
+  pushFiberToEnd(fiber: Fiber) {
+    this.fiberQueue.push(fiber);
+  }
+  pushFiberToFront(fiber: Fiber) {
+    this.fiberQueue.unshift(fiber);
+  }
 }
 
-class Fiber {
+export class Fiber {
   stack: StackFrame[] = [];
   valueStack: Value[] = [];
   constructor(instructions: Instruction[]) {
