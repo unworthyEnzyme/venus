@@ -1,4 +1,5 @@
 export type Expression =
+  | { type: "ChannelReceiveExpression"; channel: Expression }
   | { type: "LambdaExpression"; body: Statement[]; parameters: string[] }
   | { type: "NilLiteralExpression" }
   | { type: "CallExpression"; callee: Expression; args: Expression[] }
@@ -15,6 +16,7 @@ export type Expression =
   };
 
 export type Statement =
+  | { type: "ChannelSendStatement"; channel: Expression; value: Expression }
   | { type: "ReturnStatement"; expression: Expression }
   | {
     type: "FunctionDeclarationStatement";

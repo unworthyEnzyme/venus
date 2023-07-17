@@ -6,6 +6,12 @@ export class Compiler {
     const instructions: Instruction[] = [];
     for (const statement of statements) {
       switch (statement.type) {
+        case "ChannelSendStatement": {
+          instructions.push(...this.compileExpression(statement.value));
+          instructions.push(...this.compileExpression(statement.channel));
+          instructions.push({ type: "ChannelSend" });
+          break;
+        }
         case "ExpressionStatement": {
           instructions.push(
             ...this.compileExpression(statement.expression),
@@ -113,6 +119,11 @@ export class Compiler {
   compileExpression(expression: Expression): Instruction[] {
     const instructions: Instruction[] = [];
     switch (expression.type) {
+      case "ChannelReceiveExpression": {
+        instructions.push(...this.compileExpression(expression.channel));
+        instructions.push({ type: "ChannelReceive" });
+        break;
+      }
       case "NumberLiteralExpression": {
         instructions.push({
           type: "Push",

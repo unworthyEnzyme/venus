@@ -113,6 +113,78 @@ if (import.meta.main) {
     },
   ];
 
+  // fun sender(message_channel) {
+  //     message_channel <- 42
+  // }
+
+  // let message_channel = new_channel()
+  // spawn sender(message_channel)
+  // let message = <-message_channel
+  // println message
+  const program2: Statement[] = [
+    {
+      type: "FunctionDeclarationStatement",
+      name: "sender",
+      parameters: ["message_channel"],
+      body: [
+        {
+          type: "ChannelSendStatement",
+          channel: {
+            type: "IdentifierExpression",
+            name: "message_channel",
+          },
+          value: {
+            type: "NumberLiteralExpression",
+            value: 42,
+          },
+        },
+      ],
+    },
+    {
+      type: "VariableDeclarationStatement",
+      name: "message_channel",
+      initializer: {
+        type: "CallExpression",
+        callee: {
+          type: "IdentifierExpression",
+          name: "new_channel",
+        },
+        args: [],
+      },
+    },
+    {
+      type: "SpawnStatement",
+      spawnee: {
+        type: "IdentifierExpression",
+        name: "sender",
+      },
+      args: [
+        {
+          type: "IdentifierExpression",
+          name: "message_channel",
+        },
+      ],
+    },
+    {
+      type: "VariableDeclarationStatement",
+      name: "message",
+      initializer: {
+        type: "ChannelReceiveExpression",
+        channel: {
+          type: "IdentifierExpression",
+          name: "message_channel",
+        },
+      },
+    },
+    {
+      type: "PrintStatement",
+      expression: {
+        type: "IdentifierExpression",
+        name: "message",
+      },
+    },
+  ];
+
   const vm = new VM();
-  vm.run(program);
+  vm.run(program2);
 }
