@@ -1,6 +1,7 @@
 import type { Instruction } from "./instruction.ts";
 
 export type Value =
+  | { type: "NativeFunction"; fn: (...args: Value[]) => Value; arity: number }
   | { type: "Nil" }
   | { type: "Number"; value: number }
   | { type: "Boolean"; value: boolean }

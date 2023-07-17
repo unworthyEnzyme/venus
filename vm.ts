@@ -5,6 +5,16 @@ import { toString, Value } from "./value.ts";
 
 export class VM {
   private fiberQueue: Fiber[] = [];
+  private gloabals = new Map<string, Value>();
+  constructor() {
+    this.gloabals.set("meaning_of_life", {
+      type: "NativeFunction",
+      arity: 0,
+      fn: () => {
+        return { type: "Number", value: 42 };
+      },
+    });
+  }
   run(program: Statement[]) {
     const instructions = new Compiler().compile(program);
     const mainFiber = new Fiber([...instructions, { type: "Exit" }]);
@@ -98,6 +108,10 @@ export class VM {
               locals.has(instruction.name)
             );
             if (locals === undefined) {
+              if (this.gloabals.has(instruction.name)) {
+                fiber.valueStack.push(this.gloabals.get(instruction.name)!);
+                break;
+              }
               throw new Error(
                 `Undefined variable ${instruction.name}`,
               );
@@ -117,6 +131,10 @@ export class VM {
               locals.has(instruction.name)
             );
             if (locals === undefined) {
+              if (this.gloabals.has(instruction.name)) {
+                this.gloabals.set(instruction.name, value);
+                break;
+              }
               throw new Error(
                 `Undefined variable ${instruction.name}`,
               );
@@ -145,23 +163,36 @@ export class VM {
           }
           case "Call": {
             const callee = fiber.valueStack.pop();
-            if (callee?.type !== "Function") {
+            if (callee?.type === "Function") {
+              const locals = new Map<string, Value>();
+              const parameters = callee.parameters.toReversed();
+              for (const name of parameters) {
+                const arg = fiber.valueStack.pop();
+                if (arg === undefined) {
+                  throw new Error("Expected argument");
+                }
+                locals.set(name, arg);
+              }
+              fiber.stack.push({
+                ip: 0,
+                instructions: callee.body,
+                locals: [locals],
+              });
+            } else if (callee?.type === "NativeFunction") {
+              const args: Value[] = [];
+              for (let i = 0; i < instruction.arity; i++) {
+                const arg = fiber.valueStack.pop();
+                if (arg === undefined) {
+                  throw new Error("Expected argument");
+                }
+                args.push(arg);
+              }
+              const result = callee.fn(...args.toReversed());
+              fiber.valueStack.push(result);
+              break;
+            } else {
               throw new Error("Expected function");
             }
-            const locals = new Map<string, Value>();
-            const parameters = callee.parameters.toReversed();
-            for (const name of parameters) {
-              const arg = fiber.valueStack.pop();
-              if (arg === undefined) {
-                throw new Error("Expected argument");
-              }
-              locals.set(name, arg);
-            }
-            fiber.stack.push({
-              ip: 0,
-              instructions: callee.body,
-              locals: [locals],
-            });
             break;
           }
           case "Yield": {
