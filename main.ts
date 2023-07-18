@@ -15,7 +15,7 @@ if (import.meta.main) {
   // spawn print_numbers(1, 4)
   // print_numbers(11, 16)
 
-  const program: Statement[] = [
+  const coroutinesShowcase: Statement[] = [
     {
       type: "FunctionDeclarationStatement",
       name: "print_numbers",
@@ -121,7 +121,7 @@ if (import.meta.main) {
   // spawn sender(message_channel)
   // let message = <-message_channel
   // println message
-  const program2: Statement[] = [
+  const channelsShowcase: Statement[] = [
     {
       type: "FunctionDeclarationStatement",
       name: "sender",
@@ -186,5 +186,5 @@ if (import.meta.main) {
   ];
 
   const vm = new VM();
-  vm.run(program2);
+  vm.run(channelsShowcase);
 }
