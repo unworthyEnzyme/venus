@@ -17,13 +17,11 @@ type StackFrame = {
 };
 
 export class Channel {
-  private senders: Fiber[] = [];
   private receivers: Fiber[] = [];
   private slot: Value | null = null;
-  send(vm: VM, sender: Fiber, value: Value): boolean {
+  send(vm: VM, value: Value): boolean {
     const receiver = this.receivers.shift();
     if (!receiver) {
-      this.senders.push(sender);
       return true;
     }
     this.slot = value;

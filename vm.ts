@@ -49,7 +49,7 @@ export class VM {
             if (value === undefined) {
               throw new Error("Expected value");
             }
-            const blocked = channel.channel.send(this, fiber, value);
+            const blocked = channel.channel.send(this, value);
             if (blocked) {
               break executionLoop;
             }
