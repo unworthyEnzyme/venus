@@ -1,7 +1,6 @@
 import { Statement } from "./ast.ts";
 import { Compiler } from "./compiler.ts";
-import { Channel } from "./concurrency.ts";
-import { Instruction } from "./instruction.ts";
+import { Channel, Fiber } from "./concurrency.ts";
 import { toString, Value } from "./value.ts";
 
 export class VM {
@@ -50,7 +49,7 @@ export class VM {
             if (value === undefined) {
               throw new Error("Expected value");
             }
-            const blocked = channel.channel.send(this, fiber, value);
+            const blocked = channel.channel.send(this, value);
             if (blocked) {
               break executionLoop;
             }
@@ -267,17 +266,3 @@ export class VM {
     this.fiberQueue.unshift(fiber);
   }
 }
-
-export class Fiber {
-  stack: StackFrame[] = [];
-  valueStack: Value[] = [];
-  constructor(instructions: Instruction[]) {
-    this.stack.push({ ip: 0, instructions, locals: [new Map()] });
-  }
-}
-
-type StackFrame = {
-  ip: number;
-  instructions: Instruction[];
-  locals: Map<string, Value>[];
-};
