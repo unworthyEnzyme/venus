@@ -1,5 +1,20 @@
+import type { Instruction } from "./instruction.ts";
 import type { Value } from "./value.ts";
-import type { Fiber, VM } from "./vm.ts";
+import type { VM } from "./vm.ts";
+
+export class Fiber {
+  stack: StackFrame[] = [];
+  valueStack: Value[] = [];
+  constructor(instructions: Instruction[]) {
+    this.stack.push({ ip: 0, instructions, locals: [new Map()] });
+  }
+}
+
+type StackFrame = {
+  ip: number;
+  instructions: Instruction[];
+  locals: Map<string, Value>[];
+};
 
 export class Channel {
   private senders: Fiber[] = [];
