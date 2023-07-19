@@ -1,5 +1,18 @@
 import { Expression, Statement } from "./ast.ts";
 
+export function property_access(
+  object: Expression,
+  name: string,
+): Expression {
+  return { type: "PropertyAccessExpression", object, name };
+}
+
+export function object(
+  properties: { name: string; value: Expression }[],
+): Expression {
+  return { type: "ObjectExpression", properties };
+}
+
 export function number(value: number): Expression {
   return { type: "NumberLiteralExpression", value };
 }

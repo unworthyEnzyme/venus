@@ -43,6 +43,31 @@ export class VM {
         }
         const instruction = frame.instructions[frame.ip++];
         switch (instruction.type) {
+          case "AccessProperty": {
+            const object = fiber.value_stack.pop();
+            if (object?.type !== "Object") {
+              throw new Error("Expected object");
+            }
+            const value = object.properties[instruction.name];
+            if (value === undefined) {
+              throw new Error(`Undefined property ${instruction.name}`);
+            }
+            fiber.value_stack.push(value);
+            break;
+          }
+          case "DefineProperty": {
+            const value = fiber.value_stack.pop();
+            if (value === undefined) {
+              throw new Error("Expected value");
+            }
+            const object = fiber.value_stack.pop();
+            if (object?.type !== "Object") {
+              throw new Error("Expected object");
+            }
+            object.properties[instruction.name] = value;
+            fiber.value_stack.push(object);
+            break;
+          }
           case "ChannelSend": {
             const channel = fiber.value_stack.pop();
             const value = fiber.value_stack.pop();

@@ -1,4 +1,9 @@
 export type Expression =
+  | { type: "PropertyAccessExpression"; object: Expression; name: string }
+  | {
+    type: "ObjectExpression";
+    properties: { name: string; value: Expression }[];
+  }
   | { type: "ChannelReceiveExpression"; channel: Expression }
   | { type: "LambdaExpression"; body: Statement[]; parameters: string[] }
   | { type: "NilLiteralExpression" }

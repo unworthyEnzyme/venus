@@ -119,6 +119,28 @@ export class Compiler {
   compile_expression(expression: Expression): Instruction[] {
     const instructions: Instruction[] = [];
     switch (expression.type) {
+      case "PropertyAccessExpression": {
+        instructions.push(...this.compile_expression(expression.object));
+        instructions.push({
+          type: "AccessProperty",
+          name: expression.name,
+        });
+        break;
+      }
+      case "ObjectExpression": {
+        instructions.push({
+          type: "Push",
+          value: { type: "Object", properties: {} },
+        });
+        for (const property of expression.properties) {
+          instructions.push(...this.compile_expression(property.value));
+          instructions.push({
+            type: "DefineProperty",
+            name: property.name,
+          });
+        }
+        break;
+      }
       case "ChannelReceiveExpression": {
         instructions.push(...this.compile_expression(expression.channel));
         instructions.push({ type: "ChannelReceive" });
