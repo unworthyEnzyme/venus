@@ -1,4 +1,21 @@
 import { Statement } from "./ast.ts";
+import {
+  assignment,
+  binary,
+  call,
+  expression_statement,
+  fun,
+  identifier,
+  lambda,
+  nil,
+  number,
+  print,
+  return_,
+  spawn,
+  variable_declaration,
+  while_,
+  yield_,
+} from "./ast_builder.ts";
 import { Compiler } from "./compiler.ts";
 import { assertEquals } from "https://deno.land/std@0.192.0/testing/asserts.ts";
 
@@ -6,31 +23,23 @@ Deno.test("compiler_test", async (t) => {
   await t.step("Compiles expressions", async (t) => {
     await t.step("Compiles nil expressions", () => {
       const compiler = new Compiler();
-      const instructions = compiler.compile_expression({
-        type: "NilLiteralExpression",
-      });
+      const instructions = compiler.compile_expression(nil());
       assertEquals(instructions, [
         { type: "Push", value: { type: "Nil" } },
       ]);
     });
     await t.step("Compiles number expressions", () => {
       const compiler = new Compiler();
-      const instructions = compiler.compile_expression({
-        type: "NumberLiteralExpression",
-        value: 10,
-      });
+      const instructions = compiler.compile_expression(number(10));
       assertEquals(instructions, [
         { type: "Push", value: { type: "Number", value: 10 } },
       ]);
     });
     await t.step("Compiles binary expressions", () => {
       const compiler = new Compiler();
-      const instructions = compiler.compile_expression({
-        type: "BinaryExpression",
-        operator: "Add",
-        left: { type: "NumberLiteralExpression", value: 10 },
-        right: { type: "NumberLiteralExpression", value: 20 },
-      });
+      const instructions = compiler.compile_expression(
+        binary("+", number(10), number(20)),
+      );
       assertEquals(instructions, [
         { type: "Push", value: { type: "Number", value: 10 } },
         { type: "Push", value: { type: "Number", value: 20 } },
@@ -39,25 +48,14 @@ Deno.test("compiler_test", async (t) => {
     });
     await t.step("Compiles identifier expressions", () => {
       const compiler = new Compiler();
-      const instructions = compiler.compile_expression({
-        type: "IdentifierExpression",
-        name: "x",
-      });
+      const instructions = compiler.compile_expression(identifier("x"));
       assertEquals(instructions, [{ type: "GetLocal", name: "x" }]);
     });
     await t.step("Call expressions", () => {
       const compiler = new Compiler();
-      const instructions = compiler.compile_expression({
-        type: "CallExpression",
-        callee: {
-          type: "IdentifierExpression",
-          name: "add",
-        },
-        args: [
-          { type: "NumberLiteralExpression", value: 10 },
-          { type: "NumberLiteralExpression", value: 20 },
-        ],
-      });
+      const instructions = compiler.compile_expression(
+        call(identifier("add"), [number(10), number(20)]),
+      );
       assertEquals(instructions, [
         { type: "Push", value: { type: "Number", value: 10 } },
         { type: "Push", value: { type: "Number", value: 20 } },
@@ -69,36 +67,12 @@ Deno.test("compiler_test", async (t) => {
   await t.step("Compiles statements", async (t) => {
     await t.step("Compiles while statements", () => {
       //while (x < 10) { x = x + 1; }
-      const statement: Statement = {
-        type: "WhileStatement",
-        condition: {
-          type: "BinaryExpression",
-          operator: "LessThan",
-          left: {
-            type: "IdentifierExpression",
-            name: "x",
-          },
-          right: {
-            type: "NumberLiteralExpression",
-            value: 10,
-          },
-        },
-        body: [
-          {
-            type: "AssignmentStatement",
-            name: "x",
-            value: {
-              type: "BinaryExpression",
-              operator: "Add",
-              left: { type: "IdentifierExpression", name: "x" },
-              right: {
-                type: "NumberLiteralExpression",
-                value: 1,
-              },
-            },
-          },
+      const statement: Statement = while_(
+        binary("<", identifier("x"), number(10)),
+        [
+          assignment("x", binary("+", identifier("x"), number(1))),
         ],
-      };
+      );
       const compiler = new Compiler();
       const instructions = compiler.compile([statement]);
       assertEquals(instructions, [
@@ -118,10 +92,7 @@ Deno.test("compiler_test", async (t) => {
     await t.step("Compiles expression statements", () => {
       const compiler = new Compiler();
       const instructions = compiler.compile([
-        {
-          type: "ExpressionStatement",
-          expression: { type: "NumberLiteralExpression", value: 10 },
-        },
+        expression_statement(number(10)),
       ]);
       assertEquals(instructions, [
         { type: "Push", value: { type: "Number", value: 10 } },
@@ -131,10 +102,7 @@ Deno.test("compiler_test", async (t) => {
     await t.step("Compiles return statements", () => {
       const compiler = new Compiler();
       const instructions = compiler.compile([
-        {
-          type: "ReturnStatement",
-          expression: { type: "NumberLiteralExpression", value: 10 },
-        },
+        return_(number(10)),
       ]);
       assertEquals(instructions, [
         { type: "Push", value: { type: "Number", value: 10 } },
@@ -144,30 +112,9 @@ Deno.test("compiler_test", async (t) => {
     await t.step("Compiles function declaration statements", () => {
       const compiler = new Compiler();
       const body: Statement[] = [
-        {
-          type: "ReturnStatement",
-          expression: {
-            type: "BinaryExpression",
-            operator: "Add",
-            left: {
-              type: "IdentifierExpression",
-              name: "x",
-            },
-            right: {
-              type: "IdentifierExpression",
-              name: "y",
-            },
-          },
-        },
+        return_(binary("+", identifier("x"), identifier("y"))),
       ];
-      const instructions = compiler.compile([
-        {
-          type: "FunctionDeclarationStatement",
-          name: "add",
-          parameters: ["x", "y"],
-          body: body,
-        },
-      ]);
+      const instructions = compiler.compile([fun("add", ["x", "y"], body)]);
       assertEquals(instructions, [
         {
           type: "Push",
@@ -182,23 +129,10 @@ Deno.test("compiler_test", async (t) => {
     });
     await t.step("Compiles spawn statements", () => {
       const compiler = new Compiler();
-      const expression: Statement = {
-        type: "SpawnStatement",
-        args: [{ type: "NumberLiteralExpression", value: 10 }],
-        spawnee: {
-          type: "LambdaExpression",
-          body: [
-            {
-              type: "PrintStatement",
-              expression: {
-                type: "IdentifierExpression",
-                name: "x",
-              },
-            },
-          ],
-          parameters: ["x"],
-        },
-      };
+      const expression: Statement = spawn(
+        lambda(["x"], [print(identifier("x"))]),
+        [number(10)],
+      );
       const instructions = compiler.compile([expression]);
       assertEquals(instructions, [
         { type: "Push", value: { type: "Number", value: 10 } },
@@ -220,17 +154,12 @@ Deno.test("compiler_test", async (t) => {
     });
     await t.step("Compiles yield statements", () => {
       const compiler = new Compiler();
-      const instructions = compiler.compile([{ type: "YieldStatement" }]);
+      const instructions = compiler.compile([yield_()]);
       assertEquals(instructions, [{ type: "Yield" }]);
     });
     await t.step("Compiles print statements", () => {
       const compiler = new Compiler();
-      const instructions = compiler.compile([
-        {
-          type: "PrintStatement",
-          expression: { type: "NumberLiteralExpression", value: 10 },
-        },
-      ]);
+      const instructions = compiler.compile([print(number(10))]);
       assertEquals(instructions, [
         { type: "Push", value: { type: "Number", value: 10 } },
         { type: "Print" },
@@ -239,11 +168,7 @@ Deno.test("compiler_test", async (t) => {
     await t.step("Compiles variable declaration statements", () => {
       const compiler = new Compiler();
       const instructions = compiler.compile([
-        {
-          type: "VariableDeclarationStatement",
-          name: "x",
-          initializer: { type: "NumberLiteralExpression", value: 10 },
-        },
+        variable_declaration("x", number(10)),
       ]);
       assertEquals(instructions, [
         { type: "Push", value: { type: "Number", value: 10 } },
@@ -252,13 +177,7 @@ Deno.test("compiler_test", async (t) => {
     });
     await t.step("Compiles assignment statements", () => {
       const compiler = new Compiler();
-      const instructions = compiler.compile([
-        {
-          type: "AssignmentStatement",
-          name: "x",
-          value: { type: "NumberLiteralExpression", value: 10 },
-        },
-      ]);
+      const instructions = compiler.compile([assignment("x", number(10))]);
       assertEquals(instructions, [
         { type: "Push", value: { type: "Number", value: 10 } },
         { type: "SetLocal", name: "x" },
