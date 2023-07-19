@@ -23,19 +23,20 @@ export class Channel {
   constructor(private capacity: number) {}
   send(vm: VM, value: Value): boolean {
     const receiver = this.receivers.shift();
-    if (!receiver) {
-      this.sends.push(value);
+    if (receiver) {
+      receiver.value_stack.push(value);
+      vm.enqueue_fiber_to_front(receiver);
       return true;
     }
-    receiver.value_stack.push(value);
-    vm.enqueue_fiber_to_front(receiver);
 
     if (this.buffer.length < this.capacity) {
       this.buffer.push(value);
       return false;
     }
 
-    return false;
+    this.sends.push(value);
+
+    return true;
   }
   receive(receiver: Fiber): Value | null {
     if (this.buffer.length > 0) {
