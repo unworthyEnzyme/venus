@@ -7,31 +7,31 @@ export class Compiler {
     for (const statement of statements) {
       switch (statement.type) {
         case "ChannelSendStatement": {
-          instructions.push(...this.compileExpression(statement.value));
-          instructions.push(...this.compileExpression(statement.channel));
+          instructions.push(...this.compile_expression(statement.value));
+          instructions.push(...this.compile_expression(statement.channel));
           instructions.push({ type: "ChannelSend" });
           break;
         }
         case "ExpressionStatement": {
           instructions.push(
-            ...this.compileExpression(statement.expression),
+            ...this.compile_expression(statement.expression),
           );
           instructions.push({ type: "Pop" });
           break;
         }
         case "ReturnStatement": {
           instructions.push(
-            ...this.compileExpression(statement.expression),
+            ...this.compile_expression(statement.expression),
           );
           instructions.push({ type: "Return" });
           break;
         }
         case "FunctionDeclarationStatement": {
           const body = this.compile(statement.body);
-          const doesItHaveReturn = body.some(
+          const does_it_have_return = body.some(
             (instruction) => instruction.type === "Return",
           );
-          if (!doesItHaveReturn) {
+          if (!does_it_have_return) {
             body.push({ type: "Push", value: { type: "Nil" } });
             body.push({ type: "Return" });
           }
@@ -51,10 +51,10 @@ export class Compiler {
         }
         case "SpawnStatement": {
           for (const arg of statement.args) {
-            instructions.push(...this.compileExpression(arg));
+            instructions.push(...this.compile_expression(arg));
           }
           instructions.push(
-            ...this.compileExpression(statement.spawnee),
+            ...this.compile_expression(statement.spawnee),
           );
           instructions.push({
             type: "Spawn",
@@ -68,33 +68,33 @@ export class Compiler {
         }
         case "PrintStatement": {
           instructions.push(
-            ...this.compileExpression(statement.expression),
+            ...this.compile_expression(statement.expression),
           );
           instructions.push({ type: "Print" });
           break;
         }
         case "WhileStatement": {
           instructions.push({ type: "BlockStart" });
-          const loopExpression = this.compileExpression(
+          const loop_expression = this.compile_expression(
             statement.condition,
           );
-          instructions.push(...loopExpression);
-          const loopBody = this.compile(statement.body);
+          instructions.push(...loop_expression);
+          const loop_body = this.compile(statement.body);
           instructions.push({
             type: "JumpIfFalse",
-            offset: loopBody.length + 1,
+            offset: loop_body.length + 1,
           });
-          instructions.push(...loopBody);
+          instructions.push(...loop_body);
           instructions.push({
             type: "Jump",
-            offset: -(loopBody.length + loopExpression.length + 2),
+            offset: -(loop_body.length + loop_expression.length + 2),
           });
           instructions.push({ type: "BlockEnd" });
           break;
         }
         case "VariableDeclarationStatement": {
           instructions.push(
-            ...this.compileExpression(statement.initializer),
+            ...this.compile_expression(statement.initializer),
           );
           instructions.push({
             type: "DeclareLocal",
@@ -104,7 +104,7 @@ export class Compiler {
         }
         case "AssignmentStatement": {
           instructions.push(
-            ...this.compileExpression(statement.value),
+            ...this.compile_expression(statement.value),
           );
           instructions.push({
             type: "SetLocal",
@@ -116,11 +116,11 @@ export class Compiler {
     }
     return instructions;
   }
-  compileExpression(expression: Expression): Instruction[] {
+  compile_expression(expression: Expression): Instruction[] {
     const instructions: Instruction[] = [];
     switch (expression.type) {
       case "ChannelReceiveExpression": {
-        instructions.push(...this.compileExpression(expression.channel));
+        instructions.push(...this.compile_expression(expression.channel));
         instructions.push({ type: "ChannelReceive" });
         break;
       }
@@ -139,8 +139,8 @@ export class Compiler {
         break;
       }
       case "BinaryExpression": {
-        instructions.push(...this.compileExpression(expression.left));
-        instructions.push(...this.compileExpression(expression.right));
+        instructions.push(...this.compile_expression(expression.left));
+        instructions.push(...this.compile_expression(expression.right));
         switch (expression.operator) {
           case "LessThan":
             instructions.push({ type: "LessThan" });
@@ -163,9 +163,9 @@ export class Compiler {
       }
       case "CallExpression": {
         for (const arg of expression.args) {
-          instructions.push(...this.compileExpression(arg));
+          instructions.push(...this.compile_expression(arg));
         }
-        instructions.push(...this.compileExpression(expression.callee));
+        instructions.push(...this.compile_expression(expression.callee));
         instructions.push({
           type: "Call",
           arity: expression.args.length,

@@ -4,7 +4,7 @@ import type { VM } from "./vm.ts";
 
 export class Fiber {
   stack: StackFrame[] = [];
-  valueStack: Value[] = [];
+  value_stack: Value[] = [];
   constructor(instructions: Instruction[]) {
     this.stack.push({ ip: 0, instructions, locals: [new Map()] });
   }
@@ -27,8 +27,8 @@ export class Channel {
       this.sends.push(value);
       return true;
     }
-    receiver.valueStack.push(value);
-    vm.pushFiberToFront(receiver);
+    receiver.value_stack.push(value);
+    vm.push_fiber_to_front(receiver);
 
     if (this.buffer.length < this.capacity) {
       this.buffer.push(value);

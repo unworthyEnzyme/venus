@@ -6,7 +6,7 @@ Deno.test("compiler_test", async (t) => {
   await t.step("Compiles expressions", async (t) => {
     await t.step("Compiles nil expressions", () => {
       const compiler = new Compiler();
-      const instructions = compiler.compileExpression({
+      const instructions = compiler.compile_expression({
         type: "NilLiteralExpression",
       });
       assertEquals(instructions, [
@@ -15,7 +15,7 @@ Deno.test("compiler_test", async (t) => {
     });
     await t.step("Compiles number expressions", () => {
       const compiler = new Compiler();
-      const instructions = compiler.compileExpression({
+      const instructions = compiler.compile_expression({
         type: "NumberLiteralExpression",
         value: 10,
       });
@@ -25,7 +25,7 @@ Deno.test("compiler_test", async (t) => {
     });
     await t.step("Compiles binary expressions", () => {
       const compiler = new Compiler();
-      const instructions = compiler.compileExpression({
+      const instructions = compiler.compile_expression({
         type: "BinaryExpression",
         operator: "Add",
         left: { type: "NumberLiteralExpression", value: 10 },
@@ -39,7 +39,7 @@ Deno.test("compiler_test", async (t) => {
     });
     await t.step("Compiles identifier expressions", () => {
       const compiler = new Compiler();
-      const instructions = compiler.compileExpression({
+      const instructions = compiler.compile_expression({
         type: "IdentifierExpression",
         name: "x",
       });
@@ -47,7 +47,7 @@ Deno.test("compiler_test", async (t) => {
     });
     await t.step("Call expressions", () => {
       const compiler = new Compiler();
-      const instructions = compiler.compileExpression({
+      const instructions = compiler.compile_expression({
         type: "CallExpression",
         callee: {
           type: "IdentifierExpression",

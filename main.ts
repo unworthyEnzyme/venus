@@ -3,15 +3,15 @@ import {
   assignment,
   binary,
   call,
-  channelReceive,
-  channelSend,
-  expressionStatement,
+  channel_receive,
+  channel_send,
+  expression_statement,
   function_,
   identifier,
   number,
   print,
   spawn,
-  variableDeclaration,
+  variable_declaration,
   while_,
   yield_,
 } from "./ast_builder.ts";
@@ -31,9 +31,9 @@ if (import.meta.main) {
   // spawn print_numbers(1, 4)
   // print_numbers(11, 16)
 
-  const coroutinesShowcase: Statement[] = [
+  const coroutines_showcase: Statement[] = [
     function_("print_numbers", ["start", "end"], [
-      variableDeclaration("i", identifier("start")),
+      variable_declaration("i", identifier("start")),
       while_(
         binary("<", identifier("i"), binary("+", identifier("end"), number(1))),
         [
@@ -44,7 +44,7 @@ if (import.meta.main) {
       ),
     ]),
     spawn(identifier("print_numbers"), [number(1), number(4)]),
-    expressionStatement(
+    expression_statement(
       call(identifier("print_numbers"), [number(11), number(16)]),
     ),
   ];
@@ -121,22 +121,22 @@ if (import.meta.main) {
   //   },
   // ];
 
-  const channelsShowcase: Statement[] = [
+  const channels_showcase: Statement[] = [
     function_("sender", ["message_channel"], [
-      channelSend(identifier("message_channel"), number(42)),
+      channel_send(identifier("message_channel"), number(42)),
     ]),
-    variableDeclaration(
+    variable_declaration(
       "message_channel",
       call(identifier("new_channel"), [number(1)]),
     ),
     spawn(identifier("sender"), [identifier("message_channel")]),
-    variableDeclaration(
+    variable_declaration(
       "message",
-      channelReceive(identifier("message_channel")),
+      channel_receive(identifier("message_channel")),
     ),
     print(identifier("message")),
   ];
 
   const vm = new VM();
-  vm.run(coroutinesShowcase);
+  vm.run(coroutines_showcase);
 }

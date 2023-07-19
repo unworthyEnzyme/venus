@@ -13,7 +13,7 @@ export type Value =
     parameters: string[];
   };
 
-export function toString(value: Value) {
+export function to_string(value: Value) {
   switch (value.type) {
     case "Nil":
       return "nil";

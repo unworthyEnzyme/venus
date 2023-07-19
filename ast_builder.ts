@@ -39,11 +39,11 @@ export function lambda(
   return { type: "LambdaExpression", parameters, body };
 }
 
-export function channelReceive(channel: Expression): Expression {
+export function channel_receive(channel: Expression): Expression {
   return { type: "ChannelReceiveExpression", channel };
 }
 
-export function channelSend(
+export function channel_send(
   channel: Expression,
   value: Expression,
 ): Statement {
@@ -77,11 +77,11 @@ export function while_(
   return { type: "WhileStatement", condition, body };
 }
 
-export function expressionStatement(expression: Expression): Statement {
+export function expression_statement(expression: Expression): Statement {
   return { type: "ExpressionStatement", expression };
 }
 
-export function variableDeclaration(
+export function variable_declaration(
   name: string,
   initializer: Expression,
 ): Statement {
