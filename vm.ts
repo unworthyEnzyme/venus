@@ -17,10 +17,13 @@ export class VM {
     this.gloabals.set("new_channel", {
       type: "NativeFunction",
       arity: 0,
-      fn: () => {
+      fn: (capacity: Value) => {
+        if (capacity.type !== "Number") {
+          throw new Error("Expected number");
+        }
         return {
           type: "Channel",
-          channel: new Channel(),
+          channel: new Channel(capacity.value),
         };
       },
     });

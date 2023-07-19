@@ -19,6 +19,8 @@ type StackFrame = {
 export class Channel {
   private receivers: Fiber[] = [];
   private sends: Value[] = [];
+  private buffer: Value[] = [];
+  constructor(private capacity: number) {}
   send(vm: VM, value: Value): boolean {
     const receiver = this.receivers.shift();
     if (!receiver) {
@@ -27,9 +29,18 @@ export class Channel {
     }
     receiver.valueStack.push(value);
     vm.pushFiberToFront(receiver);
+
+    if (this.buffer.length < this.capacity) {
+      this.buffer.push(value);
+      return false;
+    }
+
     return false;
   }
   receive(receiver: Fiber): Value | null {
+    if (this.buffer.length > 0) {
+      return this.buffer.shift()!;
+    }
     const send = this.sends.shift();
     if (send) {
       return send;
