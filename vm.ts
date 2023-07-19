@@ -262,10 +262,10 @@ export class VM {
     }
   }
 
-  push_fiber_to_end(fiber: Fiber) {
+  enqueue_fiber(fiber: Fiber) {
     this.fiber_queue.push(fiber);
   }
-  push_fiber_to_front(fiber: Fiber) {
+  enqueue_fiber_to_front(fiber: Fiber) {
     this.fiber_queue.unshift(fiber);
   }
 }
