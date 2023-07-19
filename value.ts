@@ -2,6 +2,7 @@ import type { Channel } from "./concurrency.ts";
 import type { Instruction } from "./instruction.ts";
 
 export type Value =
+  | { type: "Object"; properties: Record<string, Value> }
   | { type: "Channel"; channel: Channel }
   | { type: "NativeFunction"; fn: (...args: Value[]) => Value; arity: number }
   | { type: "Nil" }

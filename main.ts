@@ -8,8 +8,11 @@ import {
   expression_statement,
   function_,
   identifier,
+  lambda,
   number,
+  object,
   print,
+  property_access,
   spawn,
   variable_declaration,
   while_,
@@ -137,6 +140,40 @@ if (import.meta.main) {
     print(identifier("message")),
   ];
 
+  // let obj = {
+  //   foo: 12,
+  //   bar: {
+  //     baz: 2
+  //   },
+  //   f: fun(x) {
+  //     print x
+  //   }
+  // }
+
+  // print obj.foo
+  // print obj.bar.baz
+  // obj.f(42)
+  const object_showcase: Statement[] = [
+    variable_declaration(
+      "obj",
+      object([
+        { name: "foo", value: number(12) },
+        {
+          name: "bar",
+          value: object([{ name: "baz", value: number(2) }]),
+        },
+        {
+          name: "f",
+          value: lambda(["x"], [print(identifier("x"))]),
+        },
+      ]),
+    ),
+    print(property_access(identifier("obj"), "foo")),
+    print(property_access(property_access(identifier("obj"), "bar"), "baz")),
+    expression_statement(
+      call(property_access(identifier("obj"), "f"), [number(42)]),
+    ),
+  ];
   const vm = new VM();
-  vm.run(coroutines_showcase);
+  vm.run(object_showcase);
 }
