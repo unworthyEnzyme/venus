@@ -1,4 +1,20 @@
 import { Statement } from "./ast.ts";
+import {
+  assignment,
+  binary,
+  call,
+  channelReceive,
+  channelSend,
+  expressionStatement,
+  function_,
+  identifier,
+  number,
+  print,
+  spawn,
+  variableDeclaration,
+  while_,
+  yield_,
+} from "./ast_builder.ts";
 import { VM } from "./vm.ts";
 
 if (import.meta.main) {
@@ -16,101 +32,21 @@ if (import.meta.main) {
   // print_numbers(11, 16)
 
   const coroutinesShowcase: Statement[] = [
-    {
-      type: "FunctionDeclarationStatement",
-      name: "print_numbers",
-      parameters: ["start", "end"],
-      body: [
-        {
-          type: "VariableDeclarationStatement",
-          name: "i",
-          initializer: {
-            type: "IdentifierExpression",
-            name: "start",
-          },
-        },
-        {
-          type: "WhileStatement",
-          condition: {
-            type: "BinaryExpression",
-            operator: "LessThan",
-            left: {
-              type: "IdentifierExpression",
-              name: "i",
-            },
-            right: {
-              type: "BinaryExpression",
-              operator: "Add",
-              left: {
-                type: "IdentifierExpression",
-                name: "end",
-              },
-              right: {
-                type: "NumberLiteralExpression",
-                value: 1,
-              },
-            },
-          },
-          body: [
-            {
-              type: "PrintStatement",
-              expression: {
-                type: "IdentifierExpression",
-                name: "i",
-              },
-            },
-            { type: "YieldStatement" },
-            {
-              type: "AssignmentStatement",
-              name: "i",
-              value: {
-                type: "BinaryExpression",
-                operator: "Add",
-                left: {
-                  type: "IdentifierExpression",
-                  name: "i",
-                },
-                right: {
-                  type: "NumberLiteralExpression",
-                  value: 1,
-                },
-              },
-            },
-          ],
-        },
-      ],
-    },
-    {
-      type: "SpawnStatement",
-      spawnee: {
-        type: "IdentifierExpression",
-        name: "print_numbers",
-      },
-      args: [
-        { type: "NumberLiteralExpression", value: 1 },
-        { type: "NumberLiteralExpression", value: 4 },
-      ],
-    },
-    {
-      type: "ExpressionStatement",
-      expression: {
-        type: "CallExpression",
-        callee: {
-          type: "IdentifierExpression",
-          name: "print_numbers",
-        },
-        args: [
-          {
-            type: "NumberLiteralExpression",
-            value: 11,
-          },
-          {
-            type: "NumberLiteralExpression",
-            value: 16,
-          },
+    function_("print_numbers", ["start", "end"], [
+      variableDeclaration("i", identifier("start")),
+      while_(
+        binary("<", identifier("i"), binary("+", identifier("end"), number(1))),
+        [
+          print(identifier("i")),
+          yield_(),
+          assignment("i", binary("+", identifier("i"), number(1))),
         ],
-      },
-    },
+      ),
+    ]),
+    spawn(identifier("print_numbers"), [number(1), number(4)]),
+    expressionStatement(
+      call(identifier("print_numbers"), [number(11), number(16)]),
+    ),
   ];
 
   // fun sender(message_channel) {
@@ -121,70 +57,86 @@ if (import.meta.main) {
   // spawn sender(message_channel)
   // let message = <-message_channel
   // println message
+  // const channelsShowcase: Statement[] = [
+  //   {
+  //     type: "FunctionDeclarationStatement",
+  //     name: "sender",
+  //     parameters: ["message_channel"],
+  //     body: [
+  //       {
+  //         type: "ChannelSendStatement",
+  //         channel: {
+  //           type: "IdentifierExpression",
+  //           name: "message_channel",
+  //         },
+  //         value: {
+  //           type: "NumberLiteralExpression",
+  //           value: 42,
+  //         },
+  //       },
+  //     ],
+  //   },
+  //   {
+  //     type: "VariableDeclarationStatement",
+  //     name: "message_channel",
+  //     initializer: {
+  //       type: "CallExpression",
+  //       callee: {
+  //         type: "IdentifierExpression",
+  //         name: "new_channel",
+  //       },
+  //       args: [{ type: "NumberLiteralExpression", value: 1 }],
+  //     },
+  //   },
+  //   {
+  //     type: "SpawnStatement",
+  //     spawnee: {
+  //       type: "IdentifierExpression",
+  //       name: "sender",
+  //     },
+  //     args: [
+  //       {
+  //         type: "IdentifierExpression",
+  //         name: "message_channel",
+  //       },
+  //     ],
+  //   },
+  //   {
+  //     type: "VariableDeclarationStatement",
+  //     name: "message",
+  //     initializer: {
+  //       type: "ChannelReceiveExpression",
+  //       channel: {
+  //         type: "IdentifierExpression",
+  //         name: "message_channel",
+  //       },
+  //     },
+  //   },
+  //   {
+  //     type: "PrintStatement",
+  //     expression: {
+  //       type: "IdentifierExpression",
+  //       name: "message",
+  //     },
+  //   },
+  // ];
+
   const channelsShowcase: Statement[] = [
-    {
-      type: "FunctionDeclarationStatement",
-      name: "sender",
-      parameters: ["message_channel"],
-      body: [
-        {
-          type: "ChannelSendStatement",
-          channel: {
-            type: "IdentifierExpression",
-            name: "message_channel",
-          },
-          value: {
-            type: "NumberLiteralExpression",
-            value: 42,
-          },
-        },
-      ],
-    },
-    {
-      type: "VariableDeclarationStatement",
-      name: "message_channel",
-      initializer: {
-        type: "CallExpression",
-        callee: {
-          type: "IdentifierExpression",
-          name: "new_channel",
-        },
-        args: [{ type: "NumberLiteralExpression", value: 1 }],
-      },
-    },
-    {
-      type: "SpawnStatement",
-      spawnee: {
-        type: "IdentifierExpression",
-        name: "sender",
-      },
-      args: [
-        {
-          type: "IdentifierExpression",
-          name: "message_channel",
-        },
-      ],
-    },
-    {
-      type: "VariableDeclarationStatement",
-      name: "message",
-      initializer: {
-        type: "ChannelReceiveExpression",
-        channel: {
-          type: "IdentifierExpression",
-          name: "message_channel",
-        },
-      },
-    },
-    {
-      type: "PrintStatement",
-      expression: {
-        type: "IdentifierExpression",
-        name: "message",
-      },
-    },
+    function_("sender", ["message_channel"], [
+      channelSend(identifier("message_channel"), number(42)),
+    ]),
+    variableDeclaration(
+      "message_channel",
+      call(identifier("new_channel"), [number(1)]),
+    ),
+    spawn(identifier("sender"), [identifier("message_channel")]),
+    variableDeclaration(
+      "message",
+      channelReceive(identifier("message_channel")),
+    ),
+    print(identifier("message")),
   ];
 
   const vm = new VM();
-  vm.run(channelsShowcase);
+  vm.run(coroutinesShowcase);
 }
