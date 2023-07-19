@@ -6,7 +6,7 @@ import {
   channel_receive,
   channel_send,
   expression_statement,
-  function_,
+  fun,
   identifier,
   lambda,
   number,
@@ -35,7 +35,7 @@ if (import.meta.main) {
   // print_numbers(11, 16)
 
   const coroutines_showcase: Statement[] = [
-    function_("print_numbers", ["start", "end"], [
+    fun("print_numbers", ["start", "end"], [
       variable_declaration("i", identifier("start")),
       while_(
         binary("<", identifier("i"), binary("+", identifier("end"), number(1))),
@@ -53,7 +53,7 @@ if (import.meta.main) {
   ];
 
   const channels_showcase: Statement[] = [
-    function_("sender", ["message_channel"], [
+    fun("sender", ["message_channel"], [
       channel_send(identifier("message_channel"), number(42)),
     ]),
     variable_declaration(

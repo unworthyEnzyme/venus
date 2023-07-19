@@ -63,7 +63,7 @@ export function channel_send(
   return { type: "ChannelSendStatement", channel, value };
 }
 
-export function function_(
+export function fun(
   name: string,
   parameters: string[],
   body: Statement[],
