@@ -5,16 +5,16 @@ import { to_string, Value } from "./value.ts";
 
 export class VM {
   private fiber_queue: Fiber[] = [];
-  private gloabals = new Map<string, Value>();
+  private globals = new Map<string, Value>();
   constructor() {
-    this.gloabals.set("meaning_of_life", {
+    this.globals.set("meaning_of_life", {
       type: "NativeFunction",
       arity: 0,
       fn: () => {
         return { type: "Number", value: 42 };
       },
     });
-    this.gloabals.set("new_channel", {
+    this.globals.set("new_channel", {
       type: "NativeFunction",
       arity: 0,
       fn: (capacity: Value) => {
@@ -147,8 +147,8 @@ export class VM {
               locals.has(instruction.name)
             );
             if (locals === undefined) {
-              if (this.gloabals.has(instruction.name)) {
-                fiber.value_stack.push(this.gloabals.get(instruction.name)!);
+              if (this.globals.has(instruction.name)) {
+                fiber.value_stack.push(this.globals.get(instruction.name)!);
                 break;
               }
               throw new Error(
@@ -170,8 +170,8 @@ export class VM {
               locals.has(instruction.name)
             );
             if (locals === undefined) {
-              if (this.gloabals.has(instruction.name)) {
-                this.gloabals.set(instruction.name, value);
+              if (this.globals.has(instruction.name)) {
+                this.globals.set(instruction.name, value);
                 break;
               }
               throw new Error(
