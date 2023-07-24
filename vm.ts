@@ -5,6 +5,7 @@ import { to_string, Value } from "./value.ts";
 
 export class VM {
   private fiber_queue: Fiber[] = [];
+  public current_fiber: Fiber | null = null;
   private globals = new Map<string, Value>();
   constructor() {
     this.globals.set("meaning_of_life", {
@@ -31,12 +32,15 @@ export class VM {
   run(program: Statement[]) {
     const instructions = new Compiler().compile(program);
     const main_fiber = new Fiber([...instructions, { type: "Exit" }]);
-    this.fiber_queue.push(main_fiber);
+    this.current_fiber = main_fiber;
+    this.fiber_queue.push(this.current_fiber);
     while (this.fiber_queue.length > 0) {
-      const fiber = this.fiber_queue.shift()!;
-      execution_loop:
+      this.current_fiber = this.fiber_queue.shift()!;
       while (true) {
-        const frame = fiber.stack.at(-1);
+        if (!this.current_fiber) {
+          break;
+        }
+        const frame = this.current_fiber.stack.at(-1);
         if (!frame) {
           //the fiber is returning from the first frame, so it's done
           break;
@@ -44,7 +48,7 @@ export class VM {
         const instruction = frame.instructions[frame.ip++];
         switch (instruction.type) {
           case "AccessProperty": {
-            const object = fiber.value_stack.pop();
+            const object = this.current_fiber.value_stack.pop();
             if (object?.type !== "Object") {
               throw new Error("Expected object");
             }
@@ -52,46 +56,40 @@ export class VM {
             if (value === undefined) {
               throw new Error(`Undefined property ${instruction.name}`);
             }
-            fiber.value_stack.push(value);
+            this.current_fiber.value_stack.push(value);
             break;
           }
           case "DefineProperty": {
-            const value = fiber.value_stack.pop();
+            const value = this.current_fiber.value_stack.pop();
             if (value === undefined) {
               throw new Error("Expected value");
             }
-            const object = fiber.value_stack.pop();
+            const object = this.current_fiber.value_stack.pop();
             if (object?.type !== "Object") {
               throw new Error("Expected object");
             }
             object.properties[instruction.name] = value;
-            fiber.value_stack.push(object);
+            this.current_fiber.value_stack.push(object);
             break;
           }
           case "ChannelSend": {
-            const channel = fiber.value_stack.pop();
-            const value = fiber.value_stack.pop();
+            const channel = this.current_fiber.value_stack.pop();
+            const value = this.current_fiber.value_stack.pop();
             if (channel?.type !== "Channel") {
               throw new Error("Expected channel");
             }
             if (value === undefined) {
               throw new Error("Expected value");
             }
-            const blocked = channel.channel.send(this, value);
-            if (blocked) {
-              break execution_loop;
-            }
+            channel.channel.send(this, value);
             break;
           }
           case "ChannelReceive": {
-            const channel = fiber.value_stack.pop();
+            const channel = this.current_fiber.value_stack.pop();
             if (channel?.type !== "Channel") {
               throw new Error("Expected channel");
             }
-            const value = channel.channel.receive(fiber);
-            if (value === null) {
-              break execution_loop;
-            }
+            channel.channel.receive(this);
             break;
           }
           case "Exit": {
@@ -102,15 +100,15 @@ export class VM {
             break;
           }
           case "Push": {
-            fiber.value_stack.push(instruction.value);
+            this.current_fiber.value_stack.push(instruction.value);
             break;
           }
           case "Pop": {
-            fiber.value_stack.pop();
+            this.current_fiber.value_stack.pop();
             break;
           }
           case "Print": {
-            const value = fiber.value_stack.pop();
+            const value = this.current_fiber.value_stack.pop();
             if (!value) {
               throw new Error("Must have a value to print");
             }
@@ -118,7 +116,7 @@ export class VM {
             break;
           }
           case "JumpIfFalse": {
-            const value = fiber.value_stack.pop();
+            const value = this.current_fiber.value_stack.pop();
             if (value?.type !== "Boolean") {
               throw new Error("Expected boolean");
             }
@@ -128,43 +126,43 @@ export class VM {
             break;
           }
           case "Add": {
-            const a = fiber.value_stack.pop();
-            const b = fiber.value_stack.pop();
-            if (a?.type !== "Number" || b?.type !== "Number") {
+            const a = this.current_fiber.value_stack.pop();
+            const b = this.current_fiber.value_stack.pop();
+            if (a?.type !==  "Number" || b?.type !== "Number") {
               throw new Error("Expected number");
             }
-            fiber.value_stack.push({
+            this.current_fiber.value_stack.push({
               type: "Number",
               value: a.value + b.value,
             });
             break;
           }
           case "LessThan": {
-            const b = fiber.value_stack.pop();
-            const a = fiber.value_stack.pop();
+            const b = this.current_fiber.value_stack.pop();
+            const a = this.current_fiber.value_stack.pop();
             if (a?.type !== "Number" || b?.type !== "Number") {
               throw new Error("Expected number");
             }
-            fiber.value_stack.push({
+            this.current_fiber.value_stack.push({
               type: "Boolean",
               value: a.value < b.value,
             });
             break;
           }
           case "GreaterThan": {
-            const b = fiber.value_stack.pop();
-            const a = fiber.value_stack.pop();
+            const b = this.current_fiber.value_stack.pop();
+            const a = this.current_fiber.value_stack.pop();
             if (a?.type !== "Number" || b?.type !== "Number") {
               throw new Error("Expected number");
             }
-            fiber.value_stack.push({
+            this.current_fiber.value_stack.push({
               type: "Boolean",
               value: a.value > b.value,
             });
             break;
           }
           case "Return": {
-            fiber.stack.pop();
+            this.current_fiber.stack.pop();
             break;
           }
           case "GetLocal": {
@@ -173,7 +171,9 @@ export class VM {
             );
             if (locals === undefined) {
               if (this.globals.has(instruction.name)) {
-                fiber.value_stack.push(this.globals.get(instruction.name)!);
+                this.current_fiber.value_stack.push(
+                  this.globals.get(instruction.name)!,
+                );
                 break;
               }
               throw new Error(
@@ -181,11 +181,11 @@ export class VM {
               );
             }
             const value = locals.get(instruction.name)!;
-            fiber.value_stack.push(value);
+            this.current_fiber.value_stack.push(value);
             break;
           }
           case "SetLocal": {
-            const value = fiber.value_stack.pop();
+            const value = this.current_fiber.value_stack.pop();
             if (value === undefined) {
               throw new Error(
                 `You need set a value ${instruction.name}`,
@@ -208,7 +208,7 @@ export class VM {
           }
           case "DeclareLocal": {
             const locals = frame.locals.at(-1)!;
-            const initializer = fiber.value_stack.pop();
+            const initializer = this.current_fiber.value_stack.pop();
             if (initializer === undefined) {
               throw new Error(
                 `You need to initialize ${instruction.name}`,
@@ -226,18 +226,18 @@ export class VM {
             break;
           }
           case "Call": {
-            const callee = fiber.value_stack.pop();
+            const callee = this.current_fiber.value_stack.pop();
             if (callee?.type === "Function") {
               const locals = new Map<string, Value>();
               const parameters = callee.parameters.toReversed();
               for (const name of parameters) {
-                const arg = fiber.value_stack.pop();
+                const arg = this.current_fiber.value_stack.pop();
                 if (arg === undefined) {
                   throw new Error("Expected argument");
                 }
                 locals.set(name, arg);
               }
-              fiber.stack.push({
+              this.current_fiber.stack.push({
                 ip: 0,
                 instructions: callee.body,
                 locals: [locals],
@@ -245,14 +245,14 @@ export class VM {
             } else if (callee?.type === "NativeFunction") {
               const args: Value[] = [];
               for (let i = 0; i < instruction.arity; i++) {
-                const arg = fiber.value_stack.pop();
+                const arg = this.current_fiber.value_stack.pop();
                 if (arg === undefined) {
                   throw new Error("Expected argument");
                 }
                 args.push(arg);
               }
               const result = callee.fn(...args.toReversed());
-              fiber.value_stack.push(result);
+              this.current_fiber.value_stack.push(result);
               break;
             } else {
               throw new Error("Expected function");
@@ -260,18 +260,18 @@ export class VM {
             break;
           }
           case "Yield": {
-            this.fiber_queue.push(fiber);
-            break execution_loop;
+            this.yield_current_fiber();
+            break;
           }
           case "Spawn": {
-            const callee = fiber.value_stack.pop();
+            const callee = this.current_fiber.value_stack.pop();
             if (callee?.type !== "Function") {
               throw new Error("Expected function");
             }
             const locals = new Map<string, Value>();
             const parameters = callee.parameters.toReversed();
             for (const name of parameters) {
-              const arg = fiber.value_stack.pop();
+              const arg = this.current_fiber.value_stack.pop();
               if (arg === undefined) {
                 throw new Error("Expected argument");
               }
@@ -292,5 +292,10 @@ export class VM {
   }
   enqueue_fiber_to_front(fiber: Fiber) {
     this.fiber_queue.unshift(fiber);
+  }
+
+  yield_current_fiber() {
+    this.enqueue_fiber(this.current_fiber!);
+    this.current_fiber = null;
   }
 }
