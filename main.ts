@@ -103,5 +103,5 @@ if (import.meta.main) {
     ),
   ];
   const vm = new VM();
-  vm.run(object_showcase);
+  vm.run(coroutines_showcase);
 }

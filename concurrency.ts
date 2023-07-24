@@ -21,32 +21,31 @@ export class Channel {
   private sends: Value[] = [];
   private buffer: Value[] = [];
   constructor(private capacity: number) {}
-  send(vm: VM, value: Value): boolean {
+  send(vm: VM, value: Value) {
     const receiver = this.receivers.shift();
     if (receiver) {
       receiver.value_stack.push(value);
       vm.enqueue_fiber_to_front(receiver);
-      return true;
+      vm.yield_current_fiber();
     }
 
     if (this.buffer.length < this.capacity) {
       this.buffer.push(value);
-      return false;
     }
 
     this.sends.push(value);
 
-    return true;
+    vm.yield_current_fiber();
   }
-  receive(receiver: Fiber): Value | null {
+  receive(vm: VM) {
     if (this.buffer.length > 0) {
       return this.buffer.shift()!;
     }
     const send = this.sends.shift();
     if (send) {
-      return send;
+      vm.current_fiber!.value_stack.push(send);
     }
-    this.receivers.push(receiver);
-    return null;
+    this.receivers.push(vm.current_fiber!);
+    vm.yield_current_fiber();
   }
 }
