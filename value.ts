@@ -2,6 +2,7 @@ import type { Channel } from "./concurrency.ts";
 import type { Instruction } from "./instruction.ts";
 
 export type Value =
+  | { type: "String"; value: string }
   | { type: "Object"; properties: Record<string, Value> }
   | { type: "Channel"; channel: Channel }
   | { type: "NativeFunction"; fn: (...args: Value[]) => Value; arity: number }
@@ -16,6 +17,8 @@ export type Value =
 
 export function to_string(value: Value) {
   switch (value.type) {
+    case "String":
+      return value.value;
     case "Nil":
       return "nil";
     case "Number":

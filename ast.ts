@@ -1,4 +1,5 @@
 export type Expression =
+  | { type: "StringLiteralExpression"; value: string }
   | { type: "PropertyAccessExpression"; object: Expression; name: string }
   | {
     type: "ObjectExpression";

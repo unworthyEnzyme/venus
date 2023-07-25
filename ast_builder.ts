@@ -1,5 +1,9 @@
 import { Expression, Statement } from "./ast.ts";
 
+export function string(value: string): Expression {
+  return { type: "StringLiteralExpression", value };
+}
+
 export function property_access(
   object: Expression,
   name: string,

@@ -119,6 +119,13 @@ export class Compiler {
   compile_expression(expression: Expression): Instruction[] {
     const instructions: Instruction[] = [];
     switch (expression.type) {
+      case "StringLiteralExpression": {
+        instructions.push({
+          type: "Push",
+          value: { type: "String", value: expression.value },
+        });
+        break;
+      }
       case "PropertyAccessExpression": {
         instructions.push(...this.compile_expression(expression.object));
         instructions.push({
