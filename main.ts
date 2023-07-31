@@ -111,5 +111,5 @@ if (import.meta.main) {
     ),
   ];
   const vm = new VM();
-  vm.run(coroutines_showcase);
+  vm.run(channels_showcase);
 }

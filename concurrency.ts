@@ -27,10 +27,12 @@ export class Channel {
       receiver.value_stack.push(value);
       vm.enqueue_fiber_to_front(receiver);
       vm.yield_current_fiber();
+      return;
     }
 
     if (this.buffer.length < this.capacity) {
       this.buffer.push(value);
+      return;
     }
 
     this.sends.push(value);
