@@ -1,3 +1,5 @@
+import { Expression, Statement } from "./ast.ts";
+
 export class Tokenizer {
     private keywords: Record<string, TokenType> = {
         or: "Or",
@@ -86,9 +88,12 @@ export class Tokenizer {
                         this.tokens.push({ type: "LeftArrow", lexeme: "<-" });
                     } else if (this.match("=")) {
                         this.advance();
-                        this.tokens.push({ type: "LessEqual", lexeme: "<=" });
+                        this.tokens.push({
+                            type: "LessThanEqual",
+                            lexeme: "<=",
+                        });
                     } else {
-                        this.tokens.push({ type: "Less", lexeme: "<" });
+                        this.tokens.push({ type: "LessThan", lexeme: "<" });
                     }
                     break;
                 }
@@ -96,11 +101,11 @@ export class Tokenizer {
                     if (this.match("=")) {
                         this.advance();
                         this.tokens.push({
-                            type: "GreaterEqual",
+                            type: "GreaterThanEqual",
                             lexeme: ">=",
                         });
                     } else {
-                        this.tokens.push({ type: "Greater", lexeme: ">" });
+                        this.tokens.push({ type: "GreaterThan", lexeme: ">" });
                     }
                     break;
                 }
@@ -159,7 +164,7 @@ export class Tokenizer {
 
         this.tokens.push({
             type: "Number",
-            lexeme: this.source.substring(start, this.current),
+            lexeme: this.source.substring(start - 1, this.current),
         });
     }
 
@@ -198,10 +203,10 @@ export type TokenType =
     | "BangEqual"
     | "Equal"
     | "EqualEqual"
-    | "Greater"
-    | "GreaterEqual"
-    | "Less"
-    | "LessEqual"
+    | "GreaterThan"
+    | "GreaterThanEqual"
+    | "LessThan"
+    | "LessThanEqual"
     | "Identifier"
     | "String"
     | "Number"
@@ -220,3 +225,137 @@ export type TokenType =
     | "LeftArrow"
     | "RightArrow"
     | "EOF";
+
+export class Parser {
+    private tokens: Token[] = [];
+    private current = 0;
+    private prefix_parselets: Map<TokenType, PrefixParselet> = new Map();
+    private infix_parselets: Map<TokenType, InfixParselet> = new Map();
+    constructor() {
+        this.register_prefix("Number", new NumberParselet());
+        this.register_infix(
+            "Plus",
+            new BinaryExpressionParselet(Precedence.SUM),
+        );
+        this.register_infix(
+            "LessThan",
+            new BinaryExpressionParselet(Precedence.LESS_THAN),
+        );
+        this.register_infix(
+            "GreaterThan",
+            new BinaryExpressionParselet(Precedence.GREATER_THAN),
+        );
+    }
+    parse(source: string): Statement[] {
+        const tokenizer = new Tokenizer(source);
+        this.tokens = tokenizer.tokenize();
+        const statements: Statement[] = [];
+        return statements;
+    }
+
+    parse_expression(precedence: number): Expression;
+    parse_expression(): Expression;
+    parse_expression(precedence?: number): Expression {
+        if (precedence === undefined) return this.parse_expression(0);
+        const token = this.advance();
+        const prefix_parselet = this.prefix_parselets.get(token.type);
+        if (!prefix_parselet) {
+            throw new Error(`No prefix parselet for ${token.type}`);
+        }
+        let left = prefix_parselet.parse(this, token);
+        while (precedence < this.get_precedence()) {
+            const token = this.advance();
+            const infix_parselet = this.infix_parselets.get(token.type);
+            if (!infix_parselet) {
+                throw new Error(`No infix parselet for ${token.type}`);
+            }
+            left = infix_parselet.parse(this, left, token);
+        }
+        return left;
+    }
+
+    private get_precedence(): number {
+        const token = this.peek();
+        const parselet = this.infix_parselets.get(token.type);
+        if (!parselet) return 0;
+        return parselet.precedence();
+    }
+
+    private advance(): Token {
+        return this.tokens[this.current++];
+    }
+
+    private peek(): Token {
+        return this.tokens[this.current];
+    }
+
+    private register_prefix(token_type: TokenType, parselet: PrefixParselet) {
+        this.prefix_parselets.set(token_type, parselet);
+    }
+
+    private register_infix(token_type: TokenType, parselet: InfixParselet) {
+        this.infix_parselets.set(token_type, parselet);
+    }
+
+    private register_binary(token_type: TokenType, precedence: number) {
+        this.register_infix(
+            token_type,
+            new BinaryExpressionParselet(precedence),
+        );
+    }
+}
+
+enum Precedence {
+    SUM = 10,
+    LESS_THAN = 20,
+    GREATER_THAN = 20,
+}
+
+interface PrefixParselet {
+    parse(parser: Parser, token: Token): Expression;
+}
+
+interface InfixParselet {
+    parse(parser: Parser, left: Expression, token: Token): Expression;
+    precedence(): number;
+}
+
+class NumberParselet implements PrefixParselet {
+    parse(parser: Parser, token: Token): Expression {
+        return { type: "NumberLiteralExpression", value: Number(token.lexeme) };
+    }
+}
+
+class BinaryExpressionParselet implements InfixParselet {
+    private _precedence: number;
+    constructor(precedence: number) {
+        this._precedence = precedence;
+    }
+
+    parse(parser: Parser, left: Expression, token: Token): Expression {
+        const right = parser.parse_expression(this.precedence());
+        return {
+            type: "BinaryExpression",
+            operator: this.to_operator(token),
+            left,
+            right,
+        };
+    }
+
+    precedence(): number {
+        return this._precedence;
+    }
+
+    private to_operator(token: Token): "LessThan" | "GreaterThan" | "Add" {
+        switch (token.type) {
+            case "LessThan":
+                return "LessThan";
+            case "GreaterThan":
+                return "GreaterThan";
+            case "Plus":
+                return "Add";
+            default:
+                throw new Error(`Unexpected token: ${token.type}`);
+        }
+    }
+}
