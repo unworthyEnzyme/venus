@@ -233,18 +233,9 @@ export class Parser {
     private infix_parselets: Map<TokenType, InfixParselet> = new Map();
     constructor() {
         this.register_prefix("Number", new NumberParselet());
-        this.register_infix(
-            "Plus",
-            new BinaryExpressionParselet(Precedence.SUM),
-        );
-        this.register_infix(
-            "LessThan",
-            new BinaryExpressionParselet(Precedence.LESS_THAN),
-        );
-        this.register_infix(
-            "GreaterThan",
-            new BinaryExpressionParselet(Precedence.GREATER_THAN),
-        );
+        this.register_binary("Plus", Precedence.SUM);
+        this.register_binary("LessThan", Precedence.LESS_THAN);
+        this.register_binary("GreaterThan", Precedence.GREATER_THAN);
     }
     parse(source: string): Statement[] {
         const tokenizer = new Tokenizer(source);
