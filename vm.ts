@@ -128,7 +128,7 @@ export class VM {
           case "Add": {
             const a = this.current_fiber.value_stack.pop();
             const b = this.current_fiber.value_stack.pop();
-            if (a?.type !==  "Number" || b?.type !== "Number") {
+            if (a?.type !== "Number" || b?.type !== "Number") {
               throw new Error("Expected number");
             }
             this.current_fiber.value_stack.push({
