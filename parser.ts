@@ -249,17 +249,13 @@ export class Parser {
   parse_expression(precedence?: number): Expression {
     if (precedence === undefined) return this.parse_expression(0);
     const token = this.advance();
-    const prefix_parselet = this.prefix_parselets.get(token.type);
-    if (!prefix_parselet) {
-      throw new Error(`No prefix parselet for ${token.type}`);
-    }
+    const prefix_parselet = this.prefix_parselets.get(token.type) ??
+      raise(`No prefix parselet for ${token.type}`);
     let left = prefix_parselet.parse(this, token);
     while (precedence < this.get_precedence()) {
       const token = this.advance();
-      const infix_parselet = this.infix_parselets.get(token.type);
-      if (!infix_parselet) {
-        throw new Error(`No infix parselet for ${token.type}`);
-      }
+      const infix_parselet = this.infix_parselets.get(token.type) ??
+        raise(`No infix parselet for ${token.type}`);
       left = infix_parselet.parse(this, left, token);
     }
     return left;
@@ -365,4 +361,8 @@ class IdentifierParselet implements PrefixParselet {
   parse(parser: Parser, token: Token): Expression {
     return { type: "IdentifierExpression", name: token.lexeme };
   }
+}
+
+function raise(message: string): never {
+  throw new Error(message);
 }
