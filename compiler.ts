@@ -7,8 +7,12 @@ export class Compiler {
     for (const statement of statements) {
       switch (statement.type) {
         case "ChannelSendStatement": {
-          instructions.push(...this.compile_expression(statement.value));
-          instructions.push(...this.compile_expression(statement.channel));
+          instructions.push(
+            ...this.compile_expression(statement.value),
+          );
+          instructions.push(
+            ...this.compile_expression(statement.channel),
+          );
           instructions.push({ type: "ChannelSend" });
           break;
         }
@@ -87,7 +91,11 @@ export class Compiler {
           instructions.push(...loop_body);
           instructions.push({
             type: "Jump",
-            offset: -(loop_body.length + loop_expression.length + 2),
+            offset: -(
+              loop_body.length +
+              loop_expression.length +
+              2
+            ),
           });
           instructions.push({ type: "BlockEnd" });
           break;
@@ -127,7 +135,9 @@ export class Compiler {
         break;
       }
       case "PropertyAccessExpression": {
-        instructions.push(...this.compile_expression(expression.object));
+        instructions.push(
+          ...this.compile_expression(expression.object),
+        );
         instructions.push({
           type: "AccessProperty",
           name: expression.name,
@@ -140,7 +150,9 @@ export class Compiler {
           value: { type: "Object", properties: {} },
         });
         for (const property of expression.properties) {
-          instructions.push(...this.compile_expression(property.value));
+          instructions.push(
+            ...this.compile_expression(property.value),
+          );
           instructions.push({
             type: "DefineProperty",
             name: property.name,
@@ -149,7 +161,9 @@ export class Compiler {
         break;
       }
       case "ChannelReceiveExpression": {
-        instructions.push(...this.compile_expression(expression.channel));
+        instructions.push(
+          ...this.compile_expression(expression.channel),
+        );
         instructions.push({ type: "ChannelReceive" });
         break;
       }
@@ -177,8 +191,8 @@ export class Compiler {
           case "GreaterThan":
             instructions.push({ type: "GreaterThan" });
             break;
-          case "Add":
-            instructions.push({ type: "Add" });
+          case "Plus":
+            instructions.push({ type: "Plus" });
             break;
         }
         break;
@@ -194,7 +208,9 @@ export class Compiler {
         for (const arg of expression.args) {
           instructions.push(...this.compile_expression(arg));
         }
-        instructions.push(...this.compile_expression(expression.callee));
+        instructions.push(
+          ...this.compile_expression(expression.callee),
+        );
         instructions.push({
           type: "Call",
           arity: expression.args.length,

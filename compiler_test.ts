@@ -43,7 +43,7 @@ Deno.test("compiler_test", async (t) => {
       assertEquals(instructions, [
         { type: "Push", value: { type: "Number", value: 10 } },
         { type: "Push", value: { type: "Number", value: 20 } },
-        { type: "Add" },
+        { type: "Plus" },
       ]);
     });
     await t.step("Compiles identifier expressions", () => {
@@ -54,12 +54,12 @@ Deno.test("compiler_test", async (t) => {
     await t.step("Call expressions", () => {
       const compiler = new Compiler();
       const instructions = compiler.compile_expression(
-        call(identifier("add"), [number(10), number(20)]),
+        call(identifier("Plus"), [number(10), number(20)]),
       );
       assertEquals(instructions, [
         { type: "Push", value: { type: "Number", value: 10 } },
         { type: "Push", value: { type: "Number", value: 20 } },
-        { type: "GetLocal", name: "add" },
+        { type: "GetLocal", name: "Plus" },
         { type: "Call", arity: 2 },
       ]);
     });
@@ -69,9 +69,7 @@ Deno.test("compiler_test", async (t) => {
       //while (x < 10) { x = x + 1; }
       const statement: Statement = while_(
         binary("<", identifier("x"), number(10)),
-        [
-          assignment("x", binary("+", identifier("x"), number(1))),
-        ],
+        [assignment("x", binary("+", identifier("x"), number(1)))],
       );
       const compiler = new Compiler();
       const instructions = compiler.compile([statement]);
@@ -83,7 +81,7 @@ Deno.test("compiler_test", async (t) => {
         { type: "JumpIfFalse", offset: 5 },
         { type: "GetLocal", name: "x" },
         { type: "Push", value: { type: "Number", value: 1 } },
-        { type: "Add" },
+        { type: "Plus" },
         { type: "SetLocal", name: "x" },
         { type: "Jump", offset: -9 },
         { type: "BlockEnd" },
@@ -101,9 +99,7 @@ Deno.test("compiler_test", async (t) => {
     });
     await t.step("Compiles return statements", () => {
       const compiler = new Compiler();
-      const instructions = compiler.compile([
-        return_(number(10)),
-      ]);
+      const instructions = compiler.compile([return_(number(10))]);
       assertEquals(instructions, [
         { type: "Push", value: { type: "Number", value: 10 } },
         { type: "Return" },
@@ -114,7 +110,9 @@ Deno.test("compiler_test", async (t) => {
       const body: Statement[] = [
         return_(binary("+", identifier("x"), identifier("y"))),
       ];
-      const instructions = compiler.compile([fun("add", ["x", "y"], body)]);
+      const instructions = compiler.compile([
+        fun("Plus", ["x", "y"], body),
+      ]);
       assertEquals(instructions, [
         {
           type: "Push",
@@ -124,7 +122,7 @@ Deno.test("compiler_test", async (t) => {
             body: compiler.compile(body),
           },
         },
-        { type: "DeclareLocal", name: "add" },
+        { type: "DeclareLocal", name: "Plus" },
       ]);
     });
     await t.step("Compiles spawn statements", () => {
@@ -177,7 +175,9 @@ Deno.test("compiler_test", async (t) => {
     });
     await t.step("Compiles assignment statements", () => {
       const compiler = new Compiler();
-      const instructions = compiler.compile([assignment("x", number(10))]);
+      const instructions = compiler.compile([
+        assignment("x", number(10)),
+      ]);
       assertEquals(instructions, [
         { type: "Push", value: { type: "Number", value: 10 } },
         { type: "SetLocal", name: "x" },

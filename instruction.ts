@@ -20,6 +20,6 @@ export type Instruction =
   | { type: "Call"; arity: number }
   | { type: "GreaterThan" }
   | { type: "LessThan" }
-  | { type: "Add" }
+  | { type: "Plus" }
   | { type: "Pop" }
   | { type: "Push"; value: Value };

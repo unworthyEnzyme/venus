@@ -4,10 +4,7 @@ export function string(value: string): Expression {
   return { type: "StringLiteralExpression", value };
 }
 
-export function property_access(
-  object: Expression,
-  name: string,
-): Expression {
+export function property_access(object: Expression, name: string): Expression {
   return { type: "PropertyAccessExpression", object, name };
 }
 
@@ -34,14 +31,11 @@ export function binary(
     ? "LessThan"
     : operator === ">"
     ? "GreaterThan"
-    : "Add";
+    : "Plus";
   return { type: "BinaryExpression", operator: mapped_operator, left, right };
 }
 
-export function call(
-  callee: Expression,
-  args: Expression[],
-): Expression {
+export function call(callee: Expression, args: Expression[]): Expression {
   return { type: "CallExpression", callee, args };
 }
 
@@ -49,10 +43,7 @@ export function nil(): Expression {
   return { type: "NilLiteralExpression" };
 }
 
-export function lambda(
-  parameters: string[],
-  body: Statement[],
-): Expression {
+export function lambda(parameters: string[], body: Statement[]): Expression {
   return { type: "LambdaExpression", parameters, body };
 }
 
@@ -87,10 +78,7 @@ export function print(expression: Expression): Statement {
   return { type: "PrintStatement", expression };
 }
 
-export function while_(
-  condition: Expression,
-  body: Statement[],
-): Statement {
+export function while_(condition: Expression, body: Statement[]): Statement {
   return { type: "WhileStatement", condition, body };
 }
 
@@ -105,10 +93,7 @@ export function variable_declaration(
   return { type: "VariableDeclarationStatement", name, initializer };
 }
 
-export function assignment(
-  name: string,
-  value: Expression,
-): Statement {
+export function assignment(name: string, value: Expression): Statement {
   return { type: "AssignmentStatement", name, value };
 }
 

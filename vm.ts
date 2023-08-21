@@ -54,7 +54,9 @@ export class VM {
             }
             const value = object.properties[instruction.name];
             if (value === undefined) {
-              throw new Error(`Undefined property ${instruction.name}`);
+              throw new Error(
+                `Undefined property ${instruction.name}`,
+              );
             }
             this.current_fiber.value_stack.push(value);
             break;
@@ -125,7 +127,7 @@ export class VM {
             }
             break;
           }
-          case "Add": {
+          case "Plus": {
             const a = this.current_fiber.value_stack.pop();
             const b = this.current_fiber.value_stack.pop();
             if (a?.type !== "Number" || b?.type !== "Number") {

@@ -337,14 +337,14 @@ class BinaryExpressionParselet implements InfixParselet {
     return this._precedence;
   }
 
-  private to_operator(token: Token): "LessThan" | "GreaterThan" | "Add" {
+  private to_operator(token: Token): "LessThan" | "GreaterThan" | "Plus" {
     switch (token.type) {
       case "LessThan":
         return "LessThan";
       case "GreaterThan":
         return "GreaterThan";
       case "Plus":
-        return "Add";
+        return "Plus";
       default:
         throw new Error(`Unexpected token: ${token.type}`);
     }
