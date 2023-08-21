@@ -5,6 +5,7 @@ import {
   ChannelReceive,
   IdentifierParselet,
   InfixParselet,
+  NilParselet,
   NumberParselet,
   PrefixParselet,
   StringParselet,
@@ -20,6 +21,7 @@ export class Parser {
     this.register_prefix("LeftArrow", new ChannelReceive());
     this.register_prefix("Identifier", new IdentifierParselet());
     this.register_prefix("String", new StringParselet());
+    this.register_prefix("Nil", new NilParselet());
     this.register_binary("Plus", Precedence.SUM);
     this.register_binary("LessThan", Precedence.LESS_THAN);
     this.register_binary("GreaterThan", Precedence.GREATER_THAN);

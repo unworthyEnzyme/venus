@@ -72,3 +72,9 @@ export class StringParselet implements PrefixParselet {
     return { type: "StringLiteralExpression", value };
   }
 }
+
+export class NilParselet implements PrefixParselet {
+  parse(_parser: Parser, _token: Token): Expression {
+    return { type: "NilLiteralExpression" };
+  }
+}
