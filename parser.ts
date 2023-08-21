@@ -8,6 +8,7 @@ import {
   NilParselet,
   NumberParselet,
   PrefixParselet,
+  PropertyAccessParselet,
   StringParselet,
 } from "./parselet.ts";
 
@@ -22,6 +23,7 @@ export class Parser {
     this.register_prefix("Identifier", new IdentifierParselet());
     this.register_prefix("String", new StringParselet());
     this.register_prefix("Nil", new NilParselet());
+    this.register_infix("Dot", new PropertyAccessParselet());
     this.register_binary("Plus", Precedence.SUM);
     this.register_binary("LessThan", Precedence.LESS_THAN);
     this.register_binary("GreaterThan", Precedence.GREATER_THAN);
@@ -81,10 +83,11 @@ export class Parser {
   }
 }
 
-enum Precedence {
+export enum Precedence {
   SUM = 10,
   LESS_THAN = 20,
   GREATER_THAN = 20,
+  MEMBER_ACCESS = 30,
 }
 
 function raise(message: string): never {

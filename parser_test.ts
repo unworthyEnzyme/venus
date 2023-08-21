@@ -1,5 +1,12 @@
 import { Expression, Token } from "./ast.ts";
-import { binary, identifier, nil, number, string } from "./ast_builder.ts";
+import {
+  binary,
+  identifier,
+  nil,
+  number,
+  property_access,
+  string,
+} from "./ast_builder.ts";
 import { Parser } from "./parser.ts";
 import { Tokenizer } from "./Tokenizer.ts";
 import { assertEquals } from "https://deno.land/std@0.192.0/testing/asserts.ts";
@@ -108,6 +115,17 @@ Deno.test("parser_test", async (t) => {
         assertEquals(
           result,
           identifier("identifier"),
+        );
+      });
+
+      await t.step("member access", () => {
+        const source = "object.property";
+        const parser = new Parser();
+        parser.parse(source);
+        const result = parser.parse_expression();
+        assertEquals(
+          result,
+          property_access(identifier("object"), "property"),
         );
       });
     });

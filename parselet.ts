@@ -1,5 +1,5 @@
 import { Expression, Token } from "./ast.ts";
-import { Parser } from "./parser.ts";
+import { Parser, Precedence } from "./parser.ts";
 
 export interface PrefixParselet {
   parse(parser: Parser, token: Token): Expression;
@@ -76,5 +76,23 @@ export class StringParselet implements PrefixParselet {
 export class NilParselet implements PrefixParselet {
   parse(_parser: Parser, _token: Token): Expression {
     return { type: "NilLiteralExpression" };
+  }
+}
+
+export class PropertyAccessParselet implements InfixParselet {
+  parse(parser: Parser, left: Expression, _token: Token): Expression {
+    const property = parser.parse_expression();
+    if (property.type !== "IdentifierExpression") {
+      throw new Error(`Expected identifier expression, got ${property.type}`);
+    }
+    return {
+      type: "PropertyAccessExpression",
+      object: left,
+      name: property.name,
+    };
+  }
+
+  precedence(): number {
+    return Precedence.MEMBER_ACCESS;
   }
 }
