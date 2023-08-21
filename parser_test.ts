@@ -1,3 +1,4 @@
+import { Expression } from "./ast.ts";
 import { binary, number } from "./ast_builder.ts";
 import { Parser, Token, Tokenizer } from "./parser.ts";
 import { assertEquals } from "https://deno.land/std@0.192.0/testing/asserts.ts";
@@ -64,6 +65,20 @@ Deno.test("parser_test", async (t) => {
         assertEquals(
           result,
           binary("+", number(1), binary("<", number(2), number(5))),
+        );
+      });
+
+      await t.step("channel receive expression", () => {
+        const source = "<-channel";
+        const parser = new Parser();
+        parser.parse(source);
+        const result = parser.parse_expression();
+        assertEquals(
+          result,
+          {
+            type: "ChannelReceiveExpression",
+            channel: { type: "IdentifierExpression", name: "channel" },
+          } satisfies Expression,
         );
       });
     });

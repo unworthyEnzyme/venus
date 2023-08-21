@@ -231,6 +231,8 @@ export class Parser {
   private infix_parselets: Map<TokenType, InfixParselet> = new Map();
   constructor() {
     this.register_prefix("Number", new NumberParselet());
+    this.register_prefix("LeftArrow", new ChannelReceive());
+    this.register_prefix("Identifier", new IdentifierParselet());
     this.register_binary("Plus", Precedence.SUM);
     this.register_binary("LessThan", Precedence.LESS_THAN);
     this.register_binary("GreaterThan", Precedence.GREATER_THAN);
@@ -346,5 +348,21 @@ class BinaryExpressionParselet implements InfixParselet {
       default:
         throw new Error(`Unexpected token: ${token.type}`);
     }
+  }
+}
+
+class ChannelReceive implements PrefixParselet {
+  parse(parser: Parser, token: Token): Expression {
+    const channel = parser.parse_expression();
+    return {
+      type: "ChannelReceiveExpression",
+      channel,
+    };
+  }
+}
+
+class IdentifierParselet implements PrefixParselet {
+  parse(parser: Parser, token: Token): Expression {
+    return { type: "IdentifierExpression", name: token.lexeme };
   }
 }
