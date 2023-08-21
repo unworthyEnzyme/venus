@@ -14,7 +14,6 @@ import {
   print,
   property_access,
   spawn,
-  string,
   variable_declaration,
   while_,
   yield_,

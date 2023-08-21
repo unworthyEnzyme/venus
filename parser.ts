@@ -268,7 +268,7 @@ interface InfixParselet {
 }
 
 class NumberParselet implements PrefixParselet {
-  parse(parser: Parser, token: Token): Expression {
+  parse(_parser: Parser, token: Token): Expression {
     return { type: "NumberLiteralExpression", value: Number(token.lexeme) };
   }
 }
@@ -308,7 +308,7 @@ class BinaryExpressionParselet implements InfixParselet {
 }
 
 class ChannelReceive implements PrefixParselet {
-  parse(parser: Parser, token: Token): Expression {
+  parse(parser: Parser, _token: Token): Expression {
     const channel = parser.parse_expression();
     return {
       type: "ChannelReceiveExpression",
@@ -318,7 +318,7 @@ class ChannelReceive implements PrefixParselet {
 }
 
 class IdentifierParselet implements PrefixParselet {
-  parse(parser: Parser, token: Token): Expression {
+  parse(_parser: Parser, token: Token): Expression {
     return { type: "IdentifierExpression", name: token.lexeme };
   }
 }
