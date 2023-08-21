@@ -84,10 +84,8 @@ export class Tokenizer {
         }
         case "<": {
           if (this.match("-")) {
-            this.advance();
             this.tokens.push({ type: "LeftArrow", lexeme: "<-" });
           } else if (this.match("=")) {
-            this.advance();
             this.tokens.push({
               type: "LessThanEqual",
               lexeme: "<=",
