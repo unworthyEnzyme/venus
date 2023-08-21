@@ -2,6 +2,7 @@ import { Tokenizer } from "./Tokenizer.ts";
 import { Expression, Statement, Token, TokenType } from "./ast.ts";
 import {
   BinaryExpressionParselet,
+  CallParselet,
   ChannelReceive,
   IdentifierParselet,
   InfixParselet,
@@ -24,6 +25,7 @@ export class Parser {
     this.register_prefix("String", new StringParselet());
     this.register_prefix("Nil", new NilParselet());
     this.register_infix("Dot", new PropertyAccessParselet());
+    this.register_infix("LeftParen", new CallParselet());
     this.register_binary("Plus", Precedence.SUM);
     this.register_binary("LessThan", Precedence.LESS_THAN);
     this.register_binary("GreaterThan", Precedence.GREATER_THAN);
@@ -63,8 +65,16 @@ export class Parser {
     return this.tokens[this.current++];
   }
 
-  private peek(): Token {
+  peek(): Token {
     return this.tokens[this.current];
+  }
+
+  consume(token: TokenType): Token {
+    const current = this.advance();
+    if (current.type !== token) {
+      throw new Error(`Expected ${token}, got ${current.type}`);
+    }
+    return current;
   }
 
   private register_prefix(token_type: TokenType, parselet: PrefixParselet) {
@@ -87,7 +97,8 @@ export enum Precedence {
   SUM = 10,
   LESS_THAN = 20,
   GREATER_THAN = 20,
-  MEMBER_ACCESS = 30,
+  CALL = 30,
+  MEMBER_ACCESS = 40,
 }
 
 function raise(message: string): never {

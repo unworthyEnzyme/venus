@@ -96,3 +96,24 @@ export class PropertyAccessParselet implements InfixParselet {
     return Precedence.MEMBER_ACCESS;
   }
 }
+
+export class CallParselet implements InfixParselet {
+  parse(parser: Parser, left: Expression, token: Token): Expression {
+    const args: Expression[] = [];
+    const first_arg = parser.parse_expression();
+    while (parser.peek().type === "Comma") {
+      parser.consume("Comma");
+      args.push(parser.parse_expression());
+    }
+    parser.consume("RightParen");
+    return {
+      type: "CallExpression",
+      callee: left,
+      args: [first_arg, ...args],
+    };
+  }
+
+  precedence(): number {
+    return Precedence.CALL;
+  }
+}

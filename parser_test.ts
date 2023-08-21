@@ -1,6 +1,7 @@
 import { Expression, Token } from "./ast.ts";
 import {
   binary,
+  call,
   identifier,
   nil,
   number,
@@ -126,6 +127,17 @@ Deno.test("parser_test", async (t) => {
         assertEquals(
           result,
           property_access(identifier("object"), "property"),
+        );
+      });
+
+      await t.step("call", () => {
+        const source = "max(a, b)";
+        const parser = new Parser();
+        parser.parse(source);
+        const result = parser.parse_expression();
+        assertEquals(
+          result,
+          call(identifier("max"), [identifier("a"), identifier("b")]),
         );
       });
     });
