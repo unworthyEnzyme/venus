@@ -1,5 +1,5 @@
 import { Expression, Token } from "./ast.ts";
-import { binary, nil, number, string } from "./ast_builder.ts";
+import { binary, identifier, nil, number, string } from "./ast_builder.ts";
 import { Parser } from "./parser.ts";
 import { Tokenizer } from "./Tokenizer.ts";
 import { assertEquals } from "https://deno.land/std@0.192.0/testing/asserts.ts";
@@ -98,6 +98,17 @@ Deno.test("parser_test", async (t) => {
         parser.parse(source);
         const result = parser.parse_expression();
         assertEquals(result, nil());
+      });
+
+      await t.step("identifier expression", () => {
+        const source = "identifier";
+        const parser = new Parser();
+        parser.parse(source);
+        const result = parser.parse_expression();
+        assertEquals(
+          result,
+          identifier("identifier"),
+        );
       });
     });
   });
