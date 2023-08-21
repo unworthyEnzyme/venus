@@ -7,6 +7,7 @@ import {
   InfixParselet,
   NumberParselet,
   PrefixParselet,
+  StringParselet,
 } from "./parselet.ts";
 
 export class Parser {
@@ -18,6 +19,7 @@ export class Parser {
     this.register_prefix("Number", new NumberParselet());
     this.register_prefix("LeftArrow", new ChannelReceive());
     this.register_prefix("Identifier", new IdentifierParselet());
+    this.register_prefix("String", new StringParselet());
     this.register_binary("Plus", Precedence.SUM);
     this.register_binary("LessThan", Precedence.LESS_THAN);
     this.register_binary("GreaterThan", Precedence.GREATER_THAN);

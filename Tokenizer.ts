@@ -110,6 +110,19 @@ export class Tokenizer {
         case "/":
           this.tokens.push({ type: "Slash", lexeme: c });
           break;
+        case '"': {
+          const start = this.current - 1;
+          while (this.peek() !== '"' && !this.is_at_end(this.source)) {
+            this.advance();
+          }
+          if (this.is_at_end(this.source)) {
+            throw new Error("Unterminated string");
+          }
+          this.advance();
+          const lexeme = this.source.substring(start, this.current);
+          this.tokens.push({ type: "String", lexeme });
+          break;
+        }
         case " ":
         case "\r":
         case "\t":

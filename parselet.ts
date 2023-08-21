@@ -65,3 +65,10 @@ export class IdentifierParselet implements PrefixParselet {
     return { type: "IdentifierExpression", name: token.lexeme };
   }
 }
+
+export class StringParselet implements PrefixParselet {
+  parse(_parser: Parser, token: Token): Expression {
+    const value = token.lexeme.substring(1, token.lexeme.length - 1);
+    return { type: "StringLiteralExpression", value };
+  }
+}
