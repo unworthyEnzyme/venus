@@ -62,16 +62,14 @@ Deno.test("parser_test", async (t) => {
       await t.step("number literal", () => {
         const source = "123";
         const parser = new Parser();
-        parser.parse(source);
-        const result = parser.parse_expression();
+        const result = parser.parse_expression_from_source(source);
         assertEquals(result, number(123));
       });
 
       await t.step("binary expression", () => {
         const source = "1 + 2 < 5";
         const parser = new Parser();
-        parser.parse(source);
-        const result = parser.parse_expression();
+        const result = parser.parse_expression_from_source(source);
         assertEquals(
           result,
           binary("+", number(1), binary("<", number(2), number(5))),
@@ -81,8 +79,7 @@ Deno.test("parser_test", async (t) => {
       await t.step("channel receive expression", () => {
         const source = "<-channel";
         const parser = new Parser();
-        parser.parse(source);
-        const result = parser.parse_expression();
+        const result = parser.parse_expression_from_source(source);
         assertEquals(
           result,
           {
@@ -95,24 +92,21 @@ Deno.test("parser_test", async (t) => {
       await t.step("string literal", () => {
         const source = '"hello"';
         const parser = new Parser();
-        parser.parse(source);
-        const result = parser.parse_expression();
+        const result = parser.parse_expression_from_source(source);
         assertEquals(result, string("hello"));
       });
 
       await t.step("nil literal", () => {
         const source = "nil";
         const parser = new Parser();
-        parser.parse(source);
-        const result = parser.parse_expression();
+        const result = parser.parse_expression_from_source(source);
         assertEquals(result, nil());
       });
 
       await t.step("identifier expression", () => {
         const source = "identifier";
         const parser = new Parser();
-        parser.parse(source);
-        const result = parser.parse_expression();
+        const result = parser.parse_expression_from_source(source);
         assertEquals(
           result,
           identifier("identifier"),
@@ -122,8 +116,7 @@ Deno.test("parser_test", async (t) => {
       await t.step("member access", () => {
         const source = "object.property";
         const parser = new Parser();
-        parser.parse(source);
-        const result = parser.parse_expression();
+        const result = parser.parse_expression_from_source(source);
         assertEquals(
           result,
           property_access(identifier("object"), "property"),
@@ -133,12 +126,20 @@ Deno.test("parser_test", async (t) => {
       await t.step("call", () => {
         const source = "max(a, b)";
         const parser = new Parser();
-        parser.parse(source);
-        const result = parser.parse_expression();
+        const result = parser.parse_expression_from_source(source);
         assertEquals(
           result,
           call(identifier("max"), [identifier("a"), identifier("b")]),
         );
+      });
+    });
+
+    await t.step("statements", async (t) => {
+      await t.step("yield", () => {
+        const source = "yield";
+        const parser = new Parser();
+        const result = parser.parse(source);
+        assertEquals(result[0], { type: "YieldStatement" });
       });
     });
   });

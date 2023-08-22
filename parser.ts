@@ -12,6 +12,7 @@ import {
   PropertyAccessParselet,
   StringParselet,
 } from "./parselet.ts";
+import * as builder from "./ast_builder.ts";
 
 export class Parser {
   private tokens: Token[] = [];
@@ -34,7 +35,44 @@ export class Parser {
     const tokenizer = new Tokenizer(source);
     this.tokens = tokenizer.tokenize();
     const statements: Statement[] = [];
+    while (!this.is_at_end()) {
+      statements.push(this.parse_statement());
+    }
     return statements;
+  }
+
+  parse_statement(): Statement {
+    if (this.match("Yield")) {
+      return builder.yield_();
+    }
+
+    return this.expression_statement();
+  }
+
+  private expression_statement(): Statement {
+    const expression = this.parse_expression();
+    this.consume("Semicolon");
+    return builder.expression_statement(expression);
+  }
+
+  private match(token_type: Token["type"]): boolean {
+    if (this.peek().type === token_type) {
+      this.advance();
+      return true;
+    }
+    return false;
+  }
+
+  private is_at_end(): boolean {
+    return this.peek().type === "EOF";
+  }
+
+  parse_expression_from_source(source: string): Expression {
+    const tokenizer = new Tokenizer(source);
+    const tokens = tokenizer.tokenize();
+    const parser = new Parser();
+    parser.tokens = tokens;
+    return parser.parse_expression();
   }
 
   parse_expression(precedence: number): Expression;
