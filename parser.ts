@@ -45,6 +45,11 @@ export class Parser {
     if (this.match("Yield")) {
       return builder.yield_();
     }
+    if (this.match("Print")) {
+      const expression = this.parse_expression();
+      this.consume("Semicolon");
+      return builder.print(expression);
+    }
 
     return this.expression_statement();
   }

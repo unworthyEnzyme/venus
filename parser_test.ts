@@ -1,10 +1,11 @@
-import { Expression, Token } from "./ast.ts";
+import { Expression, Statement, Token } from "./ast.ts";
 import {
   binary,
   call,
   identifier,
   nil,
   number,
+  print,
   property_access,
   string,
 } from "./ast_builder.ts";
@@ -140,6 +141,13 @@ Deno.test("parser_test", async (t) => {
         const parser = new Parser();
         const result = parser.parse(source);
         assertEquals(result[0], { type: "YieldStatement" });
+      });
+
+      await t.step("print", () => {
+        const source = "print 42;";
+        const parser = new Parser();
+        const result = parser.parse(source);
+        assertEquals(result[0], print(number(42)));
       });
     });
   });
