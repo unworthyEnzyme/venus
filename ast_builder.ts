@@ -35,7 +35,10 @@ export function binary(
   return { type: "BinaryExpression", operator: mapped_operator, left, right };
 }
 
-export function call(callee: Expression, args: Expression[]): Expression {
+export function call(
+  callee: Expression,
+  args: Expression[],
+): Extract<Expression, { type: "CallExpression" }> {
   return { type: "CallExpression", callee, args };
 }
 
@@ -66,8 +69,10 @@ export function fun(
   return { type: "FunctionDeclarationStatement", name, parameters, body };
 }
 
-export function spawn(spawnee: Expression, args: Expression[]): Statement {
-  return { type: "SpawnStatement", spawnee, args };
+export function spawn(
+  spawnee: Extract<Expression, { type: "CallExpression" }>,
+): Statement {
+  return { type: "SpawnStatement", spawnee };
 }
 
 export function yield_(): Statement {

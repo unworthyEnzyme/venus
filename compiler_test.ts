@@ -128,8 +128,7 @@ Deno.test("compiler_test", async (t) => {
     await t.step("Compiles spawn statements", () => {
       const compiler = new Compiler();
       const expression: Statement = spawn(
-        lambda(["x"], [print(identifier("x"))]),
-        [number(10)],
+        call(lambda(["x"], [print(identifier("x"))]), [number(10)]),
       );
       const instructions = compiler.compile([expression]);
       assertEquals(instructions, [

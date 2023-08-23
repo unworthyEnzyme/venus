@@ -46,7 +46,7 @@ if (import.meta.main) {
         ],
       ),
     ]),
-    spawn(identifier("print_numbers"), [number(1), number(4)]),
+    spawn(call(identifier("print_numbers"), [number(1), number(4)])),
     expression_statement(
       call(identifier("print_numbers"), [number(11), number(16)]),
     ),
@@ -67,7 +67,7 @@ if (import.meta.main) {
       "message_channel",
       call(identifier("new_channel"), [number(1)]),
     ),
-    spawn(identifier("sender"), [identifier("message_channel")]),
+    spawn(call(identifier("sender"), [identifier("message_channel")])),
     variable_declaration(
       "message",
       channel_receive(identifier("message_channel")),

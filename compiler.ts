@@ -54,15 +54,15 @@ export class Compiler {
           break;
         }
         case "SpawnStatement": {
-          for (const arg of statement.args) {
+          for (const arg of statement.spawnee.args) {
             instructions.push(...this.compile_expression(arg));
           }
           instructions.push(
-            ...this.compile_expression(statement.spawnee),
+            ...this.compile_expression(statement.spawnee.callee),
           );
           instructions.push({
             type: "Spawn",
-            arity: statement.args.length,
+            arity: statement.spawnee.args.length,
           });
           break;
         }

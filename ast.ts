@@ -30,7 +30,10 @@ export type Statement =
     body: Statement[];
     parameters: string[];
   }
-  | { type: "SpawnStatement"; spawnee: Expression; args: Expression[] }
+  | {
+    type: "SpawnStatement";
+    spawnee: Extract<Expression, { type: "CallExpression" }>;
+  }
   | { type: "YieldStatement" }
   | { type: "PrintStatement"; expression: Expression }
   | { type: "WhileStatement"; condition: Expression; body: Statement[] }
