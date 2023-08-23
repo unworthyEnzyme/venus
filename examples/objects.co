@@ -4,10 +4,10 @@ let obj = {
     baz: 2
   },
   f: fun(x) {
-    print x
+    print x;
   }
-}
+};
 
-print obj.foo
-print obj.bar.baz
-obj.f(42)
+print obj.foo;
+print obj.bar.baz;
+obj.f(42);
