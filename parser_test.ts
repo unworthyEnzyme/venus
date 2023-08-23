@@ -9,6 +9,7 @@ import {
   lambda,
   nil,
   number,
+  object,
   print,
   property_access,
   return_,
@@ -23,7 +24,7 @@ Deno.test("parser_test", async (t) => {
   await t.step("tokenizer", () => {
     const source = `fun print_numbers () {} let = while < > <= >= == !=
           and or true false nil return yield spawn + - , ;
-          <- -> "hello"`;
+          <- -> "hello" :`;
     const tokenizer = new Tokenizer(source);
     const tokens = tokenizer.tokenize();
     assertEquals(
@@ -59,6 +60,7 @@ Deno.test("parser_test", async (t) => {
         { type: "LeftArrow", lexeme: "<-" },
         { type: "RightArrow", lexeme: "->" },
         { type: "String", lexeme: '"hello"' },
+        { type: "Colon", lexeme: ":" },
         { type: "EOF", lexeme: "" },
       ] satisfies Token[],
     );
@@ -66,6 +68,18 @@ Deno.test("parser_test", async (t) => {
 
   await t.step("parser", async (t) => {
     await t.step("expressions", async (t) => {
+      await t.step("object literal", () => {
+        const source = "{ a: 1, b: { x: 2 } }";
+        const parser = new Parser();
+        const result = parser.parse_expression_from_source(source);
+        assertEquals(
+          result,
+          object([{ name: "a", value: number(1) }, {
+            name: "b",
+            value: object([{ name: "x", value: number(2) }]),
+          }]),
+        );
+      });
       await t.step("lambda", () => {
         const source = "fun (x) { x + 1; }";
         const parser = new Parser();

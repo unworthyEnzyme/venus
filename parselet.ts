@@ -134,3 +134,18 @@ export class LambdaParselet implements PrefixParselet {
     return lambda(params, body);
   }
 }
+
+export class ObjectLiteralParselet implements PrefixParselet {
+  parse(parser: Parser, _token: Token): Expression {
+    const properties = parser.parse_delimited("Comma", "RightBrace", () => {
+      const name = parser.consume("Identifier").lexeme;
+      parser.consume("Colon");
+      const value = parser.parse_expression();
+      return { name, value };
+    });
+    return {
+      type: "ObjectExpression",
+      properties,
+    };
+  }
+}

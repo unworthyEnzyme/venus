@@ -10,6 +10,7 @@ import {
   LambdaParselet,
   NilParselet,
   NumberParselet,
+  ObjectLiteralParselet,
   PrefixParselet,
   PropertyAccessParselet,
   StringParselet,
@@ -21,6 +22,7 @@ export class Parser {
   private prefix_parselets: Map<TokenType, PrefixParselet> = new Map();
   private infix_parselets: Map<TokenType, InfixParselet> = new Map();
   constructor() {
+    this.register_prefix("LeftBrace", new ObjectLiteralParselet());
     this.register_prefix("Fun", new LambdaParselet());
     this.register_prefix("Number", new NumberParselet());
     this.register_prefix("LeftArrow", new ChannelReceive());

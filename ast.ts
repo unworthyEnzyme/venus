@@ -41,6 +41,7 @@ export type Statement =
 
 export type Token = { type: TokenType; lexeme: string };
 export type TokenType =
+  | "Colon"
   | "LeftParen"
   | "RightParen"
   | "LeftBrace"
