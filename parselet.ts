@@ -82,14 +82,11 @@ export class NilParselet implements PrefixParselet {
 
 export class PropertyAccessParselet implements InfixParselet {
   parse(parser: Parser, left: Expression, _token: Token): Expression {
-    const property = parser.parse_expression();
-    if (property.type !== "IdentifierExpression") {
-      throw new Error(`Expected identifier expression, got ${property.type}`);
-    }
+    const property = parser.consume("Identifier");
     return {
       type: "PropertyAccessExpression",
       object: left,
-      name: property.name,
+      name: property.lexeme,
     };
   }
 

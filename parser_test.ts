@@ -146,12 +146,15 @@ Deno.test("parser_test", async (t) => {
       });
 
       await t.step("member access", () => {
-        const source = "object.property";
+        const source = "object.property.name";
         const parser = new Parser();
         const result = parser.parse_expression_from_source(source);
         assertEquals(
           result,
-          property_access(identifier("object"), "property"),
+          property_access(
+            property_access(identifier("object"), "property"),
+            "name",
+          ),
         );
       });
 
