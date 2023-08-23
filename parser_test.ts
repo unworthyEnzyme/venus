@@ -2,7 +2,10 @@ import { Expression, Statement, Token } from "./ast.ts";
 import {
   binary,
   call,
+  expression_statement,
+  fun,
   identifier,
+  lambda,
   nil,
   number,
   print,
@@ -63,6 +66,17 @@ Deno.test("parser_test", async (t) => {
 
   await t.step("parser", async (t) => {
     await t.step("expressions", async (t) => {
+      await t.step("lambda", () => {
+        const source = "fun (x) { x + 1; }";
+        const parser = new Parser();
+        const result = parser.parse_expression_from_source(source);
+        assertEquals(
+          result,
+          lambda(["x"], [
+            expression_statement(binary("+", identifier("x"), number(1))),
+          ]),
+        );
+      });
       await t.step("number literal", () => {
         const source = "123";
         const parser = new Parser();

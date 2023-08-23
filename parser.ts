@@ -6,6 +6,7 @@ import {
   ChannelReceive,
   IdentifierParselet,
   InfixParselet,
+  LambdaParselet,
   NilParselet,
   NumberParselet,
   PrefixParselet,
@@ -20,6 +21,7 @@ export class Parser {
   private prefix_parselets: Map<TokenType, PrefixParselet> = new Map();
   private infix_parselets: Map<TokenType, InfixParselet> = new Map();
   constructor() {
+    this.register_prefix("Fun", new LambdaParselet());
     this.register_prefix("Number", new NumberParselet());
     this.register_prefix("LeftArrow", new ChannelReceive());
     this.register_prefix("Identifier", new IdentifierParselet());
@@ -82,6 +84,22 @@ export class Parser {
     }
     this.consume("RightBrace");
     return statements;
+  }
+
+  parse_delimited<T>(
+    delimiter: TokenType,
+    ends_with: TokenType,
+    parser: () => T,
+  ) {
+    const list: T[] = [];
+    while (!this.is_at_end() && this.peek().type !== ends_with) {
+      list.push(parser());
+      if (this.peek().type === delimiter) {
+        this.advance();
+      }
+    }
+    this.consume(ends_with);
+    return list;
   }
 
   private expression_statement(): Statement {

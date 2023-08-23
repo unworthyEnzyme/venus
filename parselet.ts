@@ -1,4 +1,5 @@
-import { Expression, Token } from "./ast.ts";
+import { Expression, Statement, Token } from "./ast.ts";
+import { lambda } from "./ast_builder.ts";
 import { Parser, Precedence } from "./parser.ts";
 
 export interface PrefixParselet {
@@ -115,5 +116,21 @@ export class CallParselet implements InfixParselet {
 
   precedence(): number {
     return Precedence.CALL;
+  }
+}
+
+export class LambdaParselet implements PrefixParselet {
+  parse(parser: Parser, token: Token): Expression {
+    parser.consume("LeftParen");
+    const params = parser.parse_delimited("Comma", "RightParen", () => {
+      return parser.consume("Identifier").lexeme;
+    });
+    parser.consume("LeftBrace");
+    const body: Statement[] = [];
+    while (parser.peek().type !== "RightBrace") {
+      body.push(parser.parse_statement());
+    }
+    parser.consume("RightBrace");
+    return lambda(params, body);
   }
 }
