@@ -97,17 +97,13 @@ export class PropertyAccessParselet implements InfixParselet {
 
 export class CallParselet implements InfixParselet {
   parse(parser: Parser, left: Expression, _token: Token): Expression {
-    const args: Expression[] = [];
-    const first_arg = parser.parse_expression();
-    while (parser.peek().type === "Comma") {
-      parser.consume("Comma");
-      args.push(parser.parse_expression());
-    }
-    parser.consume("RightParen");
+    const args = parser.parse_delimited("Comma", "RightParen", () => {
+      return parser.parse_expression();
+    });
     return {
       type: "CallExpression",
       callee: left,
-      args: [first_arg, ...args],
+      args,
     };
   }
 
