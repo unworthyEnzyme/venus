@@ -1,9 +1,9 @@
-import { Expression, Statement, Token } from "./ast.ts";
+import { assertEquals } from "https://deno.land/std@0.192.0/testing/asserts.ts";
+import { Expression, Token } from "./ast.ts";
 import {
   binary,
   call,
   expression_statement,
-  fun,
   identifier,
   lambda,
   nil,
@@ -17,7 +17,6 @@ import {
 } from "./ast_builder.ts";
 import { Parser } from "./parser.ts";
 import { Tokenizer } from "./Tokenizer.ts";
-import { assertEquals } from "https://deno.land/std@0.192.0/testing/asserts.ts";
 
 Deno.test("parser_test", async (t) => {
   await t.step("tokenizer", () => {

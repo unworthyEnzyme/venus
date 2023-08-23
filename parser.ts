@@ -1,5 +1,6 @@
 import { Tokenizer } from "./Tokenizer.ts";
 import { Expression, Statement, Token, TokenType } from "./ast.ts";
+import * as builder from "./ast_builder.ts";
 import {
   BinaryExpressionParselet,
   CallParselet,
@@ -13,7 +14,6 @@ import {
   PropertyAccessParselet,
   StringParselet,
 } from "./parselet.ts";
-import * as builder from "./ast_builder.ts";
 
 export class Parser {
   private tokens: Token[] = [];

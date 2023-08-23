@@ -1,3 +1,4 @@
+import { assertEquals } from "https://deno.land/std@0.192.0/testing/asserts.ts";
 import { Statement } from "./ast.ts";
 import {
   assignment,
@@ -17,7 +18,6 @@ import {
   yield_,
 } from "./ast_builder.ts";
 import { Compiler } from "./compiler.ts";
-import { assertEquals } from "https://deno.land/std@0.192.0/testing/asserts.ts";
 
 Deno.test("compiler_test", async (t) => {
   await t.step("Compiles expressions", async (t) => {
