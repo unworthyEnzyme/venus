@@ -51,6 +51,12 @@ export class Parser {
       return builder.print(expression);
     }
 
+    if (this.match("Return")) {
+      const expression = this.parse_expression();
+      this.consume("Semicolon");
+      return builder.return_(expression);
+    }
+
     return this.expression_statement();
   }
 

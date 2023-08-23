@@ -7,6 +7,7 @@ import {
   number,
   print,
   property_access,
+  return_,
   string,
 } from "./ast_builder.ts";
 import { Parser } from "./parser.ts";
@@ -148,6 +149,13 @@ Deno.test("parser_test", async (t) => {
         const parser = new Parser();
         const result = parser.parse(source);
         assertEquals(result[0], print(number(42)));
+      });
+
+      await t.step("return", () => {
+        const source = "return 42;";
+        const parser = new Parser();
+        const result = parser.parse(source);
+        assertEquals(result[0], return_(number(42)));
       });
     });
   });
