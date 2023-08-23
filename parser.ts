@@ -44,6 +44,14 @@ export class Parser {
   }
 
   parse_statement(): Statement {
+    if (this.match("Spawn")) {
+      const spawnee = this.parse_expression();
+      if (spawnee.type !== "CallExpression") {
+        throw new Error(`Expected call expression, got ${spawnee.type}`);
+      }
+      this.consume("Semicolon");
+      return builder.spawn(spawnee);
+    }
     if (this.match("Yield")) {
       return builder.yield_();
     }
