@@ -11,4 +11,4 @@ Because i want to experiment quickly and don't want to bother with syntax, i
 didn't write a parser.
 
 To run a program:
-`deno run --allow-read main.ts path/to/program`
+`deno run --allow-read main.ts path/to/the/program`
