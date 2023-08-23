@@ -90,7 +90,7 @@ Deno.test("parser_test", async (t) => {
         const result = parser.parse_expression_from_source(source);
         assertEquals(
           result,
-          binary("+", number(1), binary("<", number(2), number(5))),
+          binary("<", binary("+", number(1), number(2)), number(5)),
         );
       });
 
@@ -176,7 +176,7 @@ Deno.test("parser_test", async (t) => {
         );
       });
       await t.step("yield", () => {
-        const source = "yield";
+        const source = "yield;";
         const parser = new Parser();
         const result = parser.parse(source);
         assertEquals(result[0], { type: "YieldStatement" });
