@@ -53,6 +53,7 @@ export class Parser {
       return builder.spawn(spawnee);
     }
     if (this.match("Yield")) {
+      this.consume("Semicolon");
       return builder.yield_();
     }
     if (this.match("Print")) {
