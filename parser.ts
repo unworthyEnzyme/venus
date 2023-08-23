@@ -210,9 +210,9 @@ export class Parser {
 }
 
 export enum Precedence {
-  SUM = 10,
-  LESS_THAN = 20,
-  GREATER_THAN = 20,
+  LESS_THAN = 10,
+  GREATER_THAN = 10,
+  SUM = 20,
   CALL = 30,
   MEMBER_ACCESS = 40,
 }
