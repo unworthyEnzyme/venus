@@ -9,3 +9,6 @@ stack machine. Coroutines are represented with `Fiber` and `StackFrame` because
 fiber sounds cooler. Each time we yield we add the current executing to a queue.
 Because i want to experiment quickly and don't want to bother with syntax, i
 didn't write a parser.
+
+To run a program:
+`deno run --allow-read main.ts path/to/program`
