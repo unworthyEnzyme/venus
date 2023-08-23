@@ -1,6 +1,6 @@
-import { Statement } from "./ast.ts";
 import { Compiler } from "./compiler.ts";
 import { Channel, Fiber } from "./concurrency.ts";
+import { Parser } from "./parser.ts";
 import { to_string, Value } from "./value.ts";
 
 export class VM {
@@ -29,7 +29,8 @@ export class VM {
       },
     });
   }
-  run(program: Statement[]) {
+  run(source: string) {
+    const program = new Parser().parse(source);
     const instructions = new Compiler().compile(program);
     const main_fiber = new Fiber([...instructions, { type: "Exit" }]);
     this.current_fiber = main_fiber;
