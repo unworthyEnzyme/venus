@@ -96,7 +96,7 @@ export class PropertyAccessParselet implements InfixParselet {
 }
 
 export class CallParselet implements InfixParselet {
-  parse(parser: Parser, left: Expression, token: Token): Expression {
+  parse(parser: Parser, left: Expression, _token: Token): Expression {
     const args: Expression[] = [];
     const first_arg = parser.parse_expression();
     while (parser.peek().type === "Comma") {
@@ -117,7 +117,7 @@ export class CallParselet implements InfixParselet {
 }
 
 export class LambdaParselet implements PrefixParselet {
-  parse(parser: Parser, token: Token): Expression {
+  parse(parser: Parser, _token: Token): Expression {
     parser.consume("LeftParen");
     const params = parser.parse_delimited("Comma", "RightParen", () => {
       return parser.consume("Identifier").lexeme;
