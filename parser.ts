@@ -65,7 +65,23 @@ export class Parser {
       return builder.variable_declaration(name, initializer);
     }
 
+    if (this.match("While")) {
+      const condition = this.parse_expression();
+      this.consume("LeftBrace");
+      const body = this.parse_block();
+      return builder.while_(condition, body);
+    }
+
     return this.expression_statement();
+  }
+
+  private parse_block(): Statement[] {
+    const statements: Statement[] = [];
+    while (!this.is_at_end() && this.peek().type !== "RightBrace") {
+      statements.push(this.parse_statement());
+    }
+    this.consume("RightBrace");
+    return statements;
   }
 
   private expression_statement(): Statement {

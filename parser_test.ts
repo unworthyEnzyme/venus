@@ -10,6 +10,7 @@ import {
   return_,
   string,
   variable_declaration,
+  while_,
 } from "./ast_builder.ts";
 import { Parser } from "./parser.ts";
 import { Tokenizer } from "./Tokenizer.ts";
@@ -167,6 +168,13 @@ Deno.test("parser_test", async (t) => {
           result[0],
           variable_declaration("x", number(42)),
         );
+      });
+
+      await t.step("while", () => {
+        const source = "while x { print 42; }";
+        const parser = new Parser();
+        const result = parser.parse(source);
+        assertEquals(while_(identifier("x"), [print(number(42))]), result[0]);
       });
     });
   });
