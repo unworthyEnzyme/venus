@@ -57,6 +57,14 @@ export class Parser {
       return builder.return_(expression);
     }
 
+    if (this.match("Let")) {
+      const name = this.consume("Identifier").lexeme;
+      this.consume("Equal");
+      const initializer = this.parse_expression();
+      this.consume("Semicolon");
+      return builder.variable_declaration(name, initializer);
+    }
+
     return this.expression_statement();
   }
 

@@ -9,6 +9,7 @@ import {
   property_access,
   return_,
   string,
+  variable_declaration,
 } from "./ast_builder.ts";
 import { Parser } from "./parser.ts";
 import { Tokenizer } from "./Tokenizer.ts";
@@ -156,6 +157,16 @@ Deno.test("parser_test", async (t) => {
         const parser = new Parser();
         const result = parser.parse(source);
         assertEquals(result[0], return_(number(42)));
+      });
+
+      await t.step("variable declaration", () => {
+        const source = "let x = 42;";
+        const parser = new Parser();
+        const result = parser.parse(source);
+        assertEquals(
+          result[0],
+          variable_declaration("x", number(42)),
+        );
       });
     });
   });
