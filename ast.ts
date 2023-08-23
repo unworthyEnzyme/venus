@@ -25,12 +25,6 @@ export type Statement =
   | { type: "ChannelSendStatement"; channel: Expression; value: Expression }
   | { type: "ReturnStatement"; expression: Expression }
   | {
-    type: "FunctionDeclarationStatement";
-    name: string;
-    body: Statement[];
-    parameters: string[];
-  }
-  | {
     type: "SpawnStatement";
     spawnee: Extract<Expression, { type: "CallExpression" }>;
   }

@@ -30,29 +30,6 @@ export class Compiler {
           instructions.push({ type: "Return" });
           break;
         }
-        case "FunctionDeclarationStatement": {
-          const body = this.compile(statement.body);
-          const does_it_have_return = body.some(
-            (instruction) => instruction.type === "Return",
-          );
-          if (!does_it_have_return) {
-            body.push({ type: "Push", value: { type: "Nil" } });
-            body.push({ type: "Return" });
-          }
-          instructions.push({
-            type: "Push",
-            value: {
-              type: "Function",
-              parameters: statement.parameters,
-              body: body,
-            },
-          });
-          instructions.push({
-            type: "DeclareLocal",
-            name: statement.name,
-          });
-          break;
-        }
         case "SpawnStatement": {
           for (const arg of statement.spawnee.args) {
             instructions.push(...this.compile_expression(arg));

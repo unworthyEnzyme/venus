@@ -61,14 +61,6 @@ export function channel_send(
   return { type: "ChannelSendStatement", channel, value };
 }
 
-export function fun(
-  name: string,
-  parameters: string[],
-  body: Statement[],
-): Statement {
-  return { type: "FunctionDeclarationStatement", name, parameters, body };
-}
-
 export function spawn(
   spawnee: Extract<Expression, { type: "CallExpression" }>,
 ): Statement {

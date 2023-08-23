@@ -5,7 +5,6 @@ import {
   binary,
   call,
   expression_statement,
-  fun,
   identifier,
   lambda,
   nil,
@@ -105,26 +104,7 @@ Deno.test("compiler_test", async (t) => {
         { type: "Return" },
       ]);
     });
-    await t.step("Compiles function declaration statements", () => {
-      const compiler = new Compiler();
-      const body: Statement[] = [
-        return_(binary("+", identifier("x"), identifier("y"))),
-      ];
-      const instructions = compiler.compile([
-        fun("Plus", ["x", "y"], body),
-      ]);
-      assertEquals(instructions, [
-        {
-          type: "Push",
-          value: {
-            type: "Function",
-            parameters: ["x", "y"],
-            body: compiler.compile(body),
-          },
-        },
-        { type: "DeclareLocal", name: "Plus" },
-      ]);
-    });
+
     await t.step("Compiles spawn statements", () => {
       const compiler = new Compiler();
       const expression: Statement = spawn(

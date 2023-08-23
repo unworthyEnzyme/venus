@@ -6,7 +6,6 @@ import {
   channel_receive,
   channel_send,
   expression_statement,
-  fun,
   identifier,
   lambda,
   number,
@@ -35,17 +34,24 @@ if (import.meta.main) {
   // print_numbers(11, 16)
 
   const coroutines_showcase: Statement[] = [
-    fun("print_numbers", ["start", "end"], [
-      variable_declaration("i", identifier("start")),
-      while_(
-        binary("<", identifier("i"), binary("+", identifier("end"), number(1))),
-        [
-          print(identifier("i")),
-          yield_(),
-          assignment("i", binary("+", identifier("i"), number(1))),
-        ],
-      ),
-    ]),
+    variable_declaration(
+      "print_numbers",
+      lambda(["start", "end"], [
+        variable_declaration("i", identifier("start")),
+        while_(
+          binary(
+            "<",
+            identifier("i"),
+            binary("+", identifier("end"), number(1)),
+          ),
+          [
+            print(identifier("i")),
+            yield_(),
+            assignment("i", binary("+", identifier("i"), number(1))),
+          ],
+        ),
+      ]),
+    ),
     spawn(call(identifier("print_numbers"), [number(1), number(4)])),
     expression_statement(
       call(identifier("print_numbers"), [number(11), number(16)]),
@@ -60,9 +66,12 @@ if (import.meta.main) {
   // let message = <-message_channel
   // println message
   const channels_showcase: Statement[] = [
-    fun("sender", ["message_channel"], [
-      channel_send(identifier("message_channel"), number(42)),
-    ]),
+    variable_declaration(
+      "sender",
+      lambda(["message_channel"], [
+        channel_send(identifier("message_channel"), number(42)),
+      ]),
+    ),
     variable_declaration(
       "message_channel",
       call(identifier("new_channel"), [number(1)]),
@@ -110,5 +119,5 @@ if (import.meta.main) {
     ),
   ];
   const vm = new VM();
-  vm.run(channels_showcase);
+  vm.run(coroutines_showcase);
 }
