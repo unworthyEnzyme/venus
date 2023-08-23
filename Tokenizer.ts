@@ -2,6 +2,8 @@ import { Token, TokenType } from "./ast.ts";
 
 export class Tokenizer {
   private keywords: Record<string, TokenType> = {
+    if: "If",
+    else: "Else",
     or: "Or",
     and: "And",
     false: "False",

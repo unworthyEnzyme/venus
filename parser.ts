@@ -46,6 +46,17 @@ export class Parser {
   }
 
   parse_statement(): Statement {
+    if (this.match("If")) {
+      const condition = this.parse_expression();
+      this.consume("LeftBrace");
+      const then_branch = this.parse_block();
+      let else_branch: Statement[] | null = null;
+      if (this.match("Else")) {
+        this.consume("LeftBrace");
+        else_branch = this.parse_block();
+      }
+      return builder.if_(condition, then_branch, else_branch);
+    }
     if (this.match("Spawn")) {
       const spawnee = this.parse_expression();
       if (spawnee.type !== "CallExpression") {

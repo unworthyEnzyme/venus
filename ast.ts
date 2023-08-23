@@ -22,6 +22,12 @@ export type Expression =
   };
 
 export type Statement =
+  | {
+    type: "IfStatement";
+    condition: Expression;
+    then_branch: Statement[];
+    else_branch: Statement[] | null;
+  }
   | { type: "ChannelSendStatement"; channel: Expression; value: Expression }
   | { type: "ReturnStatement"; expression: Expression }
   | {
@@ -41,6 +47,8 @@ export type Statement =
 
 export type Token = { type: TokenType; lexeme: string };
 export type TokenType =
+  | "If"
+  | "Else"
   | "Colon"
   | "LeftParen"
   | "RightParen"

@@ -97,3 +97,11 @@ export function assignment(name: string, value: Expression): Statement {
 export function return_(expression: Expression): Statement {
   return { type: "ReturnStatement", expression };
 }
+
+export function if_(
+  condition: Expression,
+  then_branch: Statement[],
+  else_branch: Statement[] | null,
+): Statement {
+  return { type: "IfStatement", condition, then_branch, else_branch };
+}

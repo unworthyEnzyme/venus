@@ -170,6 +170,36 @@ Deno.test("parser_test", async (t) => {
     });
 
     await t.step("statements", async (t) => {
+      await t.step("if-else", async (t) => {
+        await t.step("if with else", () => {
+          const source = "if x { print 42; } else { print 43; }";
+          const parser = new Parser();
+          const result = parser.parse(source);
+          assertEquals(
+            result[0],
+            {
+              type: "IfStatement",
+              condition: identifier("x"),
+              then_branch: [print(number(42))],
+              else_branch: [print(number(43))],
+            },
+          );
+        });
+        await t.step("if without else", () => {
+          const source = "if x { print 42; }";
+          const parser = new Parser();
+          const result = parser.parse(source);
+          assertEquals(
+            result[0],
+            {
+              type: "IfStatement",
+              condition: identifier("x"),
+              then_branch: [print(number(42))],
+              else_branch: null,
+            },
+          );
+        });
+      });
       await t.step("channel send", () => {
         const source = "channel <- 42;";
         const parser = new Parser();
