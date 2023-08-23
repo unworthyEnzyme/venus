@@ -1,6 +1,7 @@
 import { assertEquals } from "https://deno.land/std@0.192.0/testing/asserts.ts";
 import { Expression, Token } from "./ast.ts";
 import {
+  assignment,
   binary,
   call,
   expression_statement,
@@ -152,6 +153,28 @@ Deno.test("parser_test", async (t) => {
     });
 
     await t.step("statements", async (t) => {
+      await t.step("channel send", () => {
+        const source = "channel <- 42;";
+        const parser = new Parser();
+        const result = parser.parse(source);
+        assertEquals(
+          result[0],
+          {
+            type: "ChannelSendStatement",
+            channel: identifier("channel"),
+            value: number(42),
+          },
+        );
+      });
+      await t.step("assignment", () => {
+        const source = "x = 42;";
+        const parser = new Parser();
+        const result = parser.parse(source);
+        assertEquals(
+          result[0],
+          assignment("x", number(42)),
+        );
+      });
       await t.step("yield", () => {
         const source = "yield";
         const parser = new Parser();

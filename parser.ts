@@ -74,7 +74,23 @@ export class Parser {
       return builder.while_(condition, body);
     }
 
-    return this.expression_statement();
+    const expr = this.parse_expression();
+    if (this.match("LeftArrow")) {
+      const channel = expr;
+      const value = this.parse_expression();
+      this.consume("Semicolon");
+      return builder.channel_send(channel, value);
+    }
+    if (this.match("Equal")) {
+      const value = this.parse_expression();
+      if (expr.type !== "IdentifierExpression") {
+        throw new Error(`Expected identifier expression, got ${value.type}`);
+      }
+      this.consume("Semicolon");
+      return builder.assignment(expr.name, value);
+    }
+    this.consume("Semicolon");
+    return builder.expression_statement(expr);
   }
 
   private parse_block(): Statement[] {
