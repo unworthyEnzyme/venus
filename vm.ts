@@ -285,7 +285,7 @@ export class VM {
               });
             } else if (callee?.type === "NativeFunction") {
               const args: Value[] = [];
-              for (let i = 0; i < instruction.arity; i++) {
+              for (let i = 0; i < callee.arity; i++) {
                 const arg = this.current_fiber.value_stack.pop();
                 if (arg === undefined) {
                   throw new Error("Expected argument");
