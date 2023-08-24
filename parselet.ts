@@ -142,3 +142,15 @@ export class ObjectLiteralParselet implements PrefixParselet {
     };
   }
 }
+
+export class TrueLiteralParselet implements PrefixParselet {
+  parse(_parser: Parser, _token: Token): Expression {
+    return { type: "BooleanLiteralExpression", value: true };
+  }
+}
+
+export class FalseLiteralParselet implements PrefixParselet {
+  parse(_parser: Parser, _token: Token): Expression {
+    return { type: "BooleanLiteralExpression", value: false };
+  }
+}

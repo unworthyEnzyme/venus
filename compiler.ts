@@ -122,6 +122,13 @@ export class Compiler {
   compile_expression(expression: Expression): Instruction[] {
     const instructions: Instruction[] = [];
     switch (expression.type) {
+      case "BooleanLiteralExpression": {
+        instructions.push({
+          type: "Push",
+          value: { type: "Boolean", value: expression.value },
+        });
+        break;
+      }
       case "StringLiteralExpression": {
         instructions.push({
           type: "Push",

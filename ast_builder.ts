@@ -105,3 +105,7 @@ export function if_(
 ): Extract<Statement, { type: "IfStatement" }> {
   return { type: "IfStatement", condition, then_branch, else_branch };
 }
+
+export function boolean(value: boolean): Expression {
+  return { type: "BooleanLiteralExpression", value };
+}

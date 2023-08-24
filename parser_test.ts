@@ -68,6 +68,19 @@ Deno.test("parser_test", async (t) => {
 
   await t.step("parser", async (t) => {
     await t.step("expressions", async (t) => {
+      await t.step("boolean literal", () => {
+        const source = "true";
+        const parser = new Parser();
+        const result = parser.parse_expression_from_source(source);
+        assertEquals(result, { type: "BooleanLiteralExpression", value: true });
+
+        const source2 = "false";
+        const result2 = parser.parse_expression_from_source(source2);
+        assertEquals(
+          result2,
+          { type: "BooleanLiteralExpression", value: false },
+        );
+      });
       await t.step("object literal", () => {
         const source = "{ a: 1, b: { x: 2 } }";
         const parser = new Parser();

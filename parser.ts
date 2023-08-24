@@ -5,6 +5,7 @@ import {
   BinaryExpressionParselet,
   CallParselet,
   ChannelReceive,
+  FalseLiteralParselet,
   IdentifierParselet,
   InfixParselet,
   LambdaParselet,
@@ -14,6 +15,7 @@ import {
   PrefixParselet,
   PropertyAccessParselet,
   StringParselet,
+  TrueLiteralParselet,
 } from "./parselet.ts";
 
 export class Parser {
@@ -22,6 +24,8 @@ export class Parser {
   private prefix_parselets: Map<TokenType, PrefixParselet> = new Map();
   private infix_parselets: Map<TokenType, InfixParselet> = new Map();
   constructor() {
+    this.register_prefix("True", new TrueLiteralParselet());
+    this.register_prefix("False", new FalseLiteralParselet());
     this.register_prefix("LeftBrace", new ObjectLiteralParselet());
     this.register_prefix("Fun", new LambdaParselet());
     this.register_prefix("Number", new NumberParselet());

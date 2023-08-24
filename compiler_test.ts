@@ -3,6 +3,7 @@ import { Statement } from "./ast.ts";
 import {
   assignment,
   binary,
+  boolean,
   call,
   expression_statement,
   identifier,
@@ -22,6 +23,20 @@ import { Parser } from "./parser.ts";
 
 Deno.test("compiler_test", async (t) => {
   await t.step("Compiles expressions", async (t) => {
+    await t.step("Compiles boolean expressions", () => {
+      const compiler = new Compiler();
+      const instructions = compiler.compile_expression(boolean(true));
+      assertEquals(instructions, [{
+        type: "Push",
+        value: { type: "Boolean", value: true },
+      }]);
+
+      const instructions2 = compiler.compile_expression(boolean(false));
+      assertEquals(instructions2, [{
+        type: "Push",
+        value: { type: "Boolean", value: false },
+      }]);
+    });
     await t.step("Compiles nil expressions", () => {
       const compiler = new Compiler();
       const instructions = compiler.compile_expression(nil());
