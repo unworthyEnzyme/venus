@@ -3,6 +3,7 @@ import { Statement } from "./ast.ts";
 import {
   assignment,
   binary,
+  block,
   boolean,
   call,
   expression_statement,
@@ -81,6 +82,17 @@ Deno.test("compiler_test", async (t) => {
     });
   });
   await t.step("Compiles statements", async (t) => {
+    await t.step("block statements", () => {
+      const statement = block([print(number(10))]);
+      const compiler = new Compiler();
+      const instructions = compiler.compile([statement]);
+      assertEquals(instructions, [
+        { type: "BlockStart" },
+        { type: "Push", value: { type: "Number", value: 10 } },
+        { type: "Print" },
+        { type: "BlockEnd" },
+      ]);
+    });
     await t.step("compiles if statements", async (t) => {
       await t.step("if without else", () => {
         const statement = if_(identifier("x"), [print(number(10))], []);

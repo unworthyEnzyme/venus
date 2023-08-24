@@ -6,6 +6,12 @@ export class Compiler {
     const instructions: Instruction[] = [];
     for (const statement of statements) {
       switch (statement.type) {
+        case "BlockStatement": {
+          instructions.push({ type: "BlockStart" });
+          instructions.push(...this.compile(statement.statements));
+          instructions.push({ type: "BlockEnd" });
+          break;
+        }
         case "IfStatement": {
           instructions.push({ type: "BlockStart" });
           instructions.push(...this.compile_expression(statement.condition));

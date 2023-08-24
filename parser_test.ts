@@ -3,6 +3,7 @@ import { Expression, Token } from "./ast.ts";
 import {
   assignment,
   binary,
+  block,
   call,
   expression_statement,
   identifier,
@@ -183,6 +184,15 @@ Deno.test("parser_test", async (t) => {
     });
 
     await t.step("statements", async (t) => {
+      await t.step("block", () => {
+        const source = "{ print 42; }";
+        const parser = new Parser();
+        const result = parser.parse(source);
+        assertEquals(
+          result[0],
+          block([print(number(42))]),
+        );
+      });
       await t.step("if-else", async (t) => {
         await t.step("if with else", () => {
           const source = "if x { print 42; } else { print 43; }";

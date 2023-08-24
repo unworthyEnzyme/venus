@@ -50,6 +50,9 @@ export class Parser {
   }
 
   parse_statement(): Statement {
+    if (this.match("LeftBrace")) {
+      return builder.block(this.parse_block());
+    }
     if (this.match("If")) {
       const condition = this.parse_expression();
       this.consume("LeftBrace");

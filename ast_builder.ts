@@ -109,3 +109,7 @@ export function if_(
 export function boolean(value: boolean): Expression {
   return { type: "BooleanLiteralExpression", value };
 }
+
+export function block(statements: Statement[]): Statement {
+  return { type: "BlockStatement", statements };
+}

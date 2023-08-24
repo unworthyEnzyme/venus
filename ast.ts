@@ -23,6 +23,7 @@ export type Expression =
   };
 
 export type Statement =
+  | { type: "BlockStatement"; statements: Statement[] }
   | {
     type: "IfStatement";
     condition: Expression;
