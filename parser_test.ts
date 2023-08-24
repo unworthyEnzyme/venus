@@ -1,5 +1,5 @@
 import { assertEquals } from "https://deno.land/std@0.192.0/testing/asserts.ts";
-import { Expression, Token } from "./ast.ts";
+import * as ast from "./ast.ts";
 import {
   assignment,
   binary,
@@ -63,7 +63,7 @@ Deno.test("parser_test", async (t) => {
         { type: "String", lexeme: '"hello"' },
         { type: "Colon", lexeme: ":" },
         { type: "EOF", lexeme: "" },
-      ] satisfies Token[],
+      ] satisfies ast.Token[],
     );
   });
 
@@ -73,13 +73,13 @@ Deno.test("parser_test", async (t) => {
         const source = "true";
         const parser = new Parser();
         const result = parser.parse_expression_from_source(source);
-        assertEquals(result, { type: "BooleanLiteralExpression", value: true });
+        assertEquals(result, ast.BooleanLiteral.TRUE);
 
         const source2 = "false";
         const result2 = parser.parse_expression_from_source(source2);
         assertEquals(
           result2,
-          { type: "BooleanLiteralExpression", value: false },
+          ast.BooleanLiteral.FALSE,
         );
       });
       await t.step("object literal", () => {
@@ -128,10 +128,7 @@ Deno.test("parser_test", async (t) => {
         const result = parser.parse_expression_from_source(source);
         assertEquals(
           result,
-          {
-            type: "ChannelReceiveExpression",
-            channel: { type: "IdentifierExpression", name: "channel" },
-          } satisfies Expression,
+          new ast.ChannelReceive(identifier("channel")),
         );
       });
 
@@ -200,12 +197,11 @@ Deno.test("parser_test", async (t) => {
           const result = parser.parse(source);
           assertEquals(
             result[0],
-            {
-              type: "IfStatement",
-              condition: identifier("x"),
-              then_branch: [print(number(42))],
-              else_branch: [print(number(43))],
-            },
+            new ast.If(
+              identifier("x"),
+              [print(number(42))],
+              [print(number(43))],
+            ),
           );
         });
         await t.step("if without else", () => {
@@ -214,12 +210,11 @@ Deno.test("parser_test", async (t) => {
           const result = parser.parse(source);
           assertEquals(
             result[0],
-            {
-              type: "IfStatement",
-              condition: identifier("x"),
-              then_branch: [print(number(42))],
-              else_branch: [],
-            },
+            new ast.If(
+              identifier("x"),
+              [print(number(42))],
+              [],
+            ),
           );
         });
       });
@@ -229,11 +224,7 @@ Deno.test("parser_test", async (t) => {
         const result = parser.parse(source);
         assertEquals(
           result[0],
-          {
-            type: "ChannelSendStatement",
-            channel: identifier("channel"),
-            value: number(42),
-          },
+          new ast.ChannelSend(identifier("channel"), number(42)),
         );
       });
       await t.step("assignment", () => {
@@ -249,7 +240,7 @@ Deno.test("parser_test", async (t) => {
         const source = "yield;";
         const parser = new Parser();
         const result = parser.parse(source);
-        assertEquals(result[0], { type: "YieldStatement" });
+        assertEquals(result[0], new ast.Yield());
       });
 
       await t.step("print", () => {

@@ -33,7 +33,7 @@ export class VM {
     });
     this.globals.set("new_channel", {
       type: "NativeFunction",
-      arity: 0,
+      arity: 1,
       name: "new_channel",
       fn: (capacity: Value) => {
         if (capacity.type !== "Number") {

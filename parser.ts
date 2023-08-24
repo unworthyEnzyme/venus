@@ -1,5 +1,12 @@
 import { Tokenizer } from "./Tokenizer.ts";
-import { Expression, Statement, Token, TokenType } from "./ast.ts";
+import {
+  Call,
+  Expression,
+  Identifier,
+  Statement,
+  Token,
+  TokenType,
+} from "./ast.ts";
 import * as builder from "./ast_builder.ts";
 import {
   BinaryExpressionParselet,
@@ -68,8 +75,8 @@ export class Parser {
     }
     if (this.match("Spawn")) {
       const spawnee = this.parse_expression();
-      if (spawnee.type !== "CallExpression") {
-        throw new Error(`Expected call expression, got ${spawnee.type}`);
+      if (!spawnee.is(Call)) {
+        throw new Error(`Expected call expression, got ${spawnee}`);
       }
       this.consume("Semicolon");
       return builder.spawn(spawnee);
@@ -114,8 +121,8 @@ export class Parser {
     }
     if (this.match("Equal")) {
       const value = this.parse_expression();
-      if (expr.type !== "IdentifierExpression") {
-        throw new Error(`Expected identifier expression, got ${value.type}`);
+      if (!expr.is(Identifier)) {
+        throw new Error(`Expected identifier expression, got ${value}`);
       }
       this.consume("Semicolon");
       return builder.assignment(expr.name, value);

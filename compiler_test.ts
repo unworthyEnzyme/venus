@@ -1,5 +1,5 @@
 import { assertEquals } from "https://deno.land/std@0.192.0/testing/asserts.ts";
-import { Statement } from "./ast.ts";
+import { If, Statement } from "./ast.ts";
 import {
   assignment,
   binary,
@@ -111,10 +111,7 @@ Deno.test("compiler_test", async (t) => {
       });
       await t.step("if with else", () => {
         const source = "if x { print 10; } else { print 20; }";
-        const statement = new Parser().parse(source)[0] as Extract<
-          Statement,
-          { type: "IfStatement" }
-        >;
+        const statement = new Parser().parse(source)[0] as If;
         const compiler = new Compiler();
         const then_body = compiler.compile(statement.then_branch);
         const else_body = compiler.compile(statement.else_branch!);
