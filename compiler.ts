@@ -9,6 +9,48 @@ export class Compiler {
         instructions.push({ type: "BlockStart" });
         instructions.push(...this.compile(statement.statements));
         instructions.push({ type: "BlockEnd" });
+      } else if (statement.is(ast.Print)) {
+        instructions.push(
+          ...this.compile_expression(statement.expression),
+        );
+        instructions.push({ type: "Print" });
+      } else if (statement.is(ast.While)) {
+        instructions.push({ type: "BlockStart" });
+        const loop_expression = this.compile_expression(
+          statement.condition,
+        );
+        instructions.push(...loop_expression);
+        const loop_body = this.compile(statement.body);
+        instructions.push({
+          type: "JumpIfFalse",
+          offset: loop_body.length + 1,
+        });
+        instructions.push(...loop_body);
+        instructions.push({
+          type: "Jump",
+          offset: -(
+            loop_body.length +
+            loop_expression.length +
+            2
+          ),
+        });
+        instructions.push({ type: "BlockEnd" });
+      } else if (statement.is(ast.VariableDeclaration)) {
+        instructions.push(
+          ...this.compile_expression(statement.initializer),
+        );
+        instructions.push({
+          type: "DeclareLocal",
+          name: statement.name,
+        });
+      } else if (statement.is(ast.Assignment)) {
+        instructions.push(
+          ...this.compile_expression(statement.value),
+        );
+        instructions.push({
+          type: "SetLocal",
+          name: statement.name,
+        });
       } else if (statement.is(ast.If)) {
         instructions.push({ type: "BlockStart" });
         instructions.push(...this.compile_expression(statement.condition));
@@ -56,48 +98,6 @@ export class Compiler {
         });
       } else if (statement.is(ast.Yield)) {
         instructions.push({ type: "Yield" });
-      } else if (statement.is(ast.Print)) {
-        instructions.push(
-          ...this.compile_expression(statement.expression),
-        );
-        instructions.push({ type: "Print" });
-      } else if (statement.is(ast.While)) {
-        instructions.push({ type: "BlockStart" });
-        const loop_expression = this.compile_expression(
-          statement.condition,
-        );
-        instructions.push(...loop_expression);
-        const loop_body = this.compile(statement.body);
-        instructions.push({
-          type: "JumpIfFalse",
-          offset: loop_body.length + 1,
-        });
-        instructions.push(...loop_body);
-        instructions.push({
-          type: "Jump",
-          offset: -(
-            loop_body.length +
-            loop_expression.length +
-            2
-          ),
-        });
-        instructions.push({ type: "BlockEnd" });
-      } else if (statement.is(ast.VariableDeclaration)) {
-        instructions.push(
-          ...this.compile_expression(statement.initializer),
-        );
-        instructions.push({
-          type: "DeclareLocal",
-          name: statement.name,
-        });
-      } else if (statement.is(ast.Assignment)) {
-        instructions.push(
-          ...this.compile_expression(statement.value),
-        );
-        instructions.push({
-          type: "SetLocal",
-          name: statement.name,
-        });
       }
     }
     return instructions;
@@ -108,48 +108,6 @@ export class Compiler {
       instructions.push({
         type: "Push",
         value: { type: "Boolean", value: expression.value },
-      });
-    } else if (expression.is(ast.StringLiteral)) {
-      instructions.push({
-        type: "Push",
-        value: { type: "String", value: expression.value },
-      });
-    } else if (expression.is(ast.PropertyAccess)) {
-      instructions.push(
-        ...this.compile_expression(expression.object),
-      );
-      instructions.push({
-        type: "AccessProperty",
-        name: expression.name,
-      });
-    } else if (expression.is(ast.ObjectLiteral)) {
-      instructions.push({
-        type: "Push",
-        value: { type: "Object", properties: {} },
-      });
-      for (const property of expression.properties) {
-        instructions.push(
-          ...this.compile_expression(property.value),
-        );
-        instructions.push({
-          type: "DefineProperty",
-          name: property.name,
-        });
-      }
-    } else if (expression.is(ast.ChannelReceive)) {
-      instructions.push(
-        ...this.compile_expression(expression.channel),
-      );
-      instructions.push({ type: "ChannelReceive" });
-    } else if (expression.is(ast.NumberLiteral)) {
-      instructions.push({
-        type: "Push",
-        value: { type: "Number", value: expression.value },
-      });
-    } else if (expression.is(ast.NilLiteral)) {
-      instructions.push({
-        type: "Push",
-        value: { type: "Nil" },
       });
     } else if (expression.is(ast.Binary)) {
       instructions.push(...this.compile_expression(expression.left));
@@ -203,6 +161,48 @@ export class Compiler {
           parameters: expression.parameters,
           body: body,
         },
+      });
+    } else if (expression.is(ast.StringLiteral)) {
+      instructions.push({
+        type: "Push",
+        value: { type: "String", value: expression.value },
+      });
+    } else if (expression.is(ast.PropertyAccess)) {
+      instructions.push(
+        ...this.compile_expression(expression.object),
+      );
+      instructions.push({
+        type: "AccessProperty",
+        name: expression.name,
+      });
+    } else if (expression.is(ast.ObjectLiteral)) {
+      instructions.push({
+        type: "Push",
+        value: { type: "Object", properties: {} },
+      });
+      for (const property of expression.properties) {
+        instructions.push(
+          ...this.compile_expression(property.value),
+        );
+        instructions.push({
+          type: "DefineProperty",
+          name: property.name,
+        });
+      }
+    } else if (expression.is(ast.ChannelReceive)) {
+      instructions.push(
+        ...this.compile_expression(expression.channel),
+      );
+      instructions.push({ type: "ChannelReceive" });
+    } else if (expression.is(ast.NumberLiteral)) {
+      instructions.push({
+        type: "Push",
+        value: { type: "Number", value: expression.value },
+      });
+    } else if (expression.is(ast.NilLiteral)) {
+      instructions.push({
+        type: "Push",
+        value: { type: "Nil" },
       });
     }
     return instructions;
