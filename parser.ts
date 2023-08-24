@@ -38,6 +38,8 @@ export class Parser {
     this.register_binary("Plus", Precedence.SUM);
     this.register_binary("LessThan", Precedence.LESS_THAN);
     this.register_binary("GreaterThan", Precedence.GREATER_THAN);
+    this.register_binary("GreaterThanEqual", Precedence.GREATER_THAN_EQUAL);
+    this.register_binary("LessThanEqual", Precedence.LESS_THAN_EQUAL);
   }
   parse(source: string): Statement[] {
     const tokenizer = new Tokenizer(source);
@@ -232,6 +234,8 @@ export class Parser {
 export enum Precedence {
   LESS_THAN = 10,
   GREATER_THAN = 10,
+  LESS_THAN_EQUAL = 10,
+  GREATER_THAN_EQUAL = 10,
   SUM = 20,
   CALL = 30,
   MEMBER_ACCESS = 40,

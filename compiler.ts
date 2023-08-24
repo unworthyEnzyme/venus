@@ -202,6 +202,11 @@ export class Compiler {
           case "Plus":
             instructions.push({ type: "Plus" });
             break;
+          case "GreaterThanEqual":
+            instructions.push({ type: "GreaterThanEqual" });
+            break;
+          case "LessThanEqual":
+            instructions.push({ type: "LessThanEqual" });
         }
         break;
       }

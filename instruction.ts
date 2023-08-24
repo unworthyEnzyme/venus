@@ -1,6 +1,8 @@
 import type { Value } from "./value.ts";
 
 export type Instruction =
+  | { type: "LessThanEqual" }
+  | { type: "GreaterThanEqual" }
   | { type: "AccessProperty"; name: string }
   | { type: "DefineProperty"; name: string }
   | { type: "ChannelReceive" }

@@ -12,7 +12,12 @@ export type Expression =
   | { type: "CallExpression"; callee: Expression; args: Expression[] }
   | {
     type: "BinaryExpression";
-    operator: "LessThan" | "GreaterThan" | "Plus";
+    operator:
+      | "LessThan"
+      | "GreaterThan"
+      | "Plus"
+      | "GreaterThanEqual"
+      | "LessThanEqual";
     left: Expression;
     right: Expression;
   }

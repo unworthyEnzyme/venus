@@ -48,6 +48,30 @@ export class VM {
         }
         const instruction = frame.instructions[frame.ip++];
         switch (instruction.type) {
+          case "GreaterThanEqual": {
+            const b = this.current_fiber.value_stack.pop();
+            const a = this.current_fiber.value_stack.pop();
+            if (a?.type !== "Number" || b?.type !== "Number") {
+              throw new Error("Expected number");
+            }
+            this.current_fiber.value_stack.push({
+              type: "Boolean",
+              value: a.value >= b.value,
+            });
+            break;
+          }
+          case "LessThanEqual": {
+            const b = this.current_fiber.value_stack.pop();
+            const a = this.current_fiber.value_stack.pop();
+            if (a?.type !== "Number" || b?.type !== "Number") {
+              throw new Error("Expected number");
+            }
+            this.current_fiber.value_stack.push({
+              type: "Boolean",
+              value: a.value <= b.value,
+            });
+            break;
+          }
           case "AccessProperty": {
             const object = this.current_fiber.value_stack.pop();
             if (object?.type !== "Object") {
