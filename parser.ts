@@ -50,7 +50,7 @@ export class Parser {
       const condition = this.parse_expression();
       this.consume("LeftBrace");
       const then_branch = this.parse_block();
-      let else_branch: Statement[] | null = null;
+      let else_branch: Statement[] = [];
       if (this.match("Else")) {
         this.consume("LeftBrace");
         else_branch = this.parse_block();

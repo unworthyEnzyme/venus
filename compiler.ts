@@ -6,6 +6,24 @@ export class Compiler {
     const instructions: Instruction[] = [];
     for (const statement of statements) {
       switch (statement.type) {
+        case "IfStatement": {
+          instructions.push({ type: "BlockStart" });
+          instructions.push(...this.compile_expression(statement.condition));
+          const then_branch = this.compile(statement.then_branch);
+          const else_branch = this.compile(statement.else_branch);
+          instructions.push({
+            type: "JumpIfFalse",
+            offset: then_branch.length + 1,
+          });
+          instructions.push(...then_branch);
+          instructions.push({
+            type: "Jump",
+            offset: else_branch.length,
+          });
+          instructions.push(...else_branch);
+          instructions.push({ type: "BlockEnd" });
+          break;
+        }
         case "ChannelSendStatement": {
           instructions.push(
             ...this.compile_expression(statement.value),

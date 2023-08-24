@@ -195,7 +195,7 @@ Deno.test("parser_test", async (t) => {
               type: "IfStatement",
               condition: identifier("x"),
               then_branch: [print(number(42))],
-              else_branch: null,
+              else_branch: [],
             },
           );
         });

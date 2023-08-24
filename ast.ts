@@ -26,7 +26,7 @@ export type Statement =
     type: "IfStatement";
     condition: Expression;
     then_branch: Statement[];
-    else_branch: Statement[] | null;
+    else_branch: Statement[];
   }
   | { type: "ChannelSendStatement"; channel: Expression; value: Expression }
   | { type: "ReturnStatement"; expression: Expression }

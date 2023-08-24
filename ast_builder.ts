@@ -101,7 +101,7 @@ export function return_(expression: Expression): Statement {
 export function if_(
   condition: Expression,
   then_branch: Statement[],
-  else_branch: Statement[] | null,
-): Statement {
+  else_branch: Statement[],
+): Extract<Statement, { type: "IfStatement" }> {
   return { type: "IfStatement", condition, then_branch, else_branch };
 }

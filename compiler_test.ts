@@ -6,6 +6,7 @@ import {
   call,
   expression_statement,
   identifier,
+  if_,
   lambda,
   nil,
   number,
@@ -17,6 +18,7 @@ import {
   yield_,
 } from "./ast_builder.ts";
 import { Compiler } from "./compiler.ts";
+import { Parser } from "./parser.ts";
 
 Deno.test("compiler_test", async (t) => {
   await t.step("Compiles expressions", async (t) => {
@@ -64,6 +66,45 @@ Deno.test("compiler_test", async (t) => {
     });
   });
   await t.step("Compiles statements", async (t) => {
+    await t.step("compiles if statements", async (t) => {
+      await t.step("if without else", () => {
+        const statement = if_(identifier("x"), [print(number(10))], []);
+        const compiler = new Compiler();
+        const then_body = compiler.compile(statement.then_branch);
+        const instructions = compiler.compile([statement]);
+        assertEquals(instructions, [
+          { type: "BlockStart" },
+          { type: "GetLocal", name: "x" },
+          { type: "JumpIfFalse", offset: then_body.length + 1 },
+          { type: "Push", value: { type: "Number", value: 10 } },
+          { type: "Print" },
+          { type: "Jump", offset: 0 },
+          { type: "BlockEnd" },
+        ]);
+      });
+      await t.step("if with else", () => {
+        const source = "if x { print 10; } else { print 20; }";
+        const statement = new Parser().parse(source)[0] as Extract<
+          Statement,
+          { type: "IfStatement" }
+        >;
+        const compiler = new Compiler();
+        const then_body = compiler.compile(statement.then_branch);
+        const else_body = compiler.compile(statement.else_branch!);
+        const instructions = compiler.compile([statement]);
+        assertEquals(instructions, [
+          { type: "BlockStart" },
+          { type: "GetLocal", name: "x" },
+          { type: "JumpIfFalse", offset: then_body.length + 1 },
+          { type: "Push", value: { type: "Number", value: 10 } },
+          { type: "Print" },
+          { type: "Jump", offset: else_body.length },
+          { type: "Push", value: { type: "Number", value: 20 } },
+          { type: "Print" },
+          { type: "BlockEnd" },
+        ]);
+      });
+    });
     await t.step("Compiles while statements", () => {
       //while (x < 10) { x = x + 1; }
       const statement: Statement = while_(
