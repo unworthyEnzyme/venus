@@ -17,6 +17,11 @@ export class NumberParselet implements PrefixParselet {
   }
 }
 
+type BinaryOperator = Extract<
+  Expression,
+  { type: "BinaryExpression" }
+>["operator"];
+
 export class BinaryExpressionParselet implements InfixParselet {
   private _precedence: number;
   constructor(precedence: number) {
@@ -39,23 +44,14 @@ export class BinaryExpressionParselet implements InfixParselet {
 
   private to_operator(
     token: Token,
-  ):
-    | "LessThan"
-    | "GreaterThan"
-    | "Plus"
-    | "LessThanEqual"
-    | "GreaterThanEqual" {
+  ): BinaryOperator {
     switch (token.type) {
       case "LessThan":
-        return "LessThan";
       case "GreaterThan":
-        return "GreaterThan";
       case "Plus":
-        return "Plus";
       case "LessThanEqual":
-        return "LessThanEqual";
       case "GreaterThanEqual":
-        return "GreaterThanEqual";
+        return token.type;
       default:
         throw new Error(`Unexpected token: ${token.type}`);
     }
