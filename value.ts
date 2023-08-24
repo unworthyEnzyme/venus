@@ -5,7 +5,12 @@ export type Value =
   | { type: "String"; value: string }
   | { type: "Object"; properties: Record<string, Value> }
   | { type: "Channel"; channel: Channel }
-  | { type: "NativeFunction"; fn: (...args: Value[]) => Value; arity: number }
+  | {
+    type: "NativeFunction";
+    fn: (...args: Value[]) => Value;
+    arity: number;
+    name: string;
+  }
   | { type: "Nil" }
   | { type: "Number"; value: number }
   | { type: "Boolean"; value: boolean }

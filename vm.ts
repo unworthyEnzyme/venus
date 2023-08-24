@@ -1,3 +1,4 @@
+import { call } from "./ast_builder.ts";
 import { Compiler } from "./compiler.ts";
 import { Channel, Fiber } from "./concurrency.ts";
 import { Parser } from "./parser.ts";
@@ -11,6 +12,7 @@ export class VM {
     this.globals.set("prompt", {
       type: "NativeFunction",
       arity: 1,
+      name: "prompt",
       fn: (message: Value) => {
         if (message.type !== "String") {
           throw new Error("Expected string as an argument to `prompt`");
@@ -25,6 +27,7 @@ export class VM {
     this.globals.set("meaning_of_life", {
       type: "NativeFunction",
       arity: 0,
+      name: "meaning_of_life",
       fn: () => {
         return { type: "Number", value: 42 };
       },
@@ -32,6 +35,7 @@ export class VM {
     this.globals.set("new_channel", {
       type: "NativeFunction",
       arity: 0,
+      name: "new_channel",
       fn: (capacity: Value) => {
         if (capacity.type !== "Number") {
           throw new Error("Expected number");
@@ -288,7 +292,11 @@ export class VM {
               for (let i = 0; i < callee.arity; i++) {
                 const arg = this.current_fiber.value_stack.pop();
                 if (arg === undefined) {
-                  throw new Error("Expected argument");
+                  throw new Error(
+                    `Missing ${
+                      callee.arity - i
+                    } argument from '${callee.name}'`,
+                  );
                 }
                 args.push(arg);
               }
