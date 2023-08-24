@@ -8,6 +8,20 @@ export class VM {
   public current_fiber: Fiber | null = null;
   private globals = new Map<string, Value>();
   constructor() {
+    this.globals.set("prompt", {
+      type: "NativeFunction",
+      arity: 1,
+      fn: (message: Value) => {
+        if (message.type !== "String") {
+          throw new Error("Expected string as an argument to `prompt`");
+        }
+        const input = prompt(message.value);
+        if (input === null) {
+          return { type: "Nil" };
+        }
+        return { type: "String", value: input };
+      },
+    });
     this.globals.set("meaning_of_life", {
       type: "NativeFunction",
       arity: 0,
