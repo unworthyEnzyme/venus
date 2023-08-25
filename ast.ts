@@ -254,31 +254,6 @@ export class Assignment extends Statement {
   }
 }
 
-// export type Statement =
-//   | { type: "BlockStatement"; statements: Statement[] }
-//   | {
-//     type: "IfStatement";
-//     condition: Expression;
-//     then_branch: Statement[];
-//     else_branch: Statement[];
-//   }
-//   | { type: "ChannelSendStatement"; channel: Expression; value: Expression }
-//   | { type: "ReturnStatement"; expression: Expression }
-//   | {
-//     type: "SpawnStatement";
-//     spawnee: Extract<Expression, { type: "CallExpression" }>;
-//   }
-//   | { type: "YieldStatement" }
-//   | { type: "PrintStatement"; expression: Expression }
-//   | { type: "WhileStatement"; condition: Expression; body: Statement[] }
-//   | { type: "ExpressionStatement"; expression: Expression }
-//   | {
-//     type: "VariableDeclarationStatement";
-//     name: string;
-//     initializer: Expression;
-//   }
-//   | { type: "AssignmentStatement"; name: string; value: Expression };
-
 export type Token = { type: TokenType; lexeme: string };
 export type TokenType =
   | "If"
