@@ -1,115 +1,145 @@
-import { Expression, Statement } from "./ast.ts";
+import {
+  Assignment,
+  Binary,
+  Block,
+  BooleanLiteral,
+  Call,
+  ChannelReceive,
+  ChannelSend,
+  Expression,
+  ExpressionStatement,
+  Identifier,
+  If,
+  Lambda,
+  NilLiteral,
+  NumberLiteral,
+  ObjectLiteral,
+  Print,
+  PropertyAccess,
+  Return,
+  Spawn,
+  Statement,
+  StringLiteral,
+  VariableDeclaration,
+  While,
+  Yield,
+} from "./ast.ts";
 
-export function string(value: string): Expression {
-  return { type: "StringLiteralExpression", value };
+export function string(value: string): StringLiteral {
+  return new StringLiteral(value);
 }
 
-export function property_access(object: Expression, name: string): Expression {
-  return { type: "PropertyAccessExpression", object, name };
+export function property_access(
+  object: Expression,
+  name: string,
+): PropertyAccess {
+  return new PropertyAccess(object, name);
 }
 
 export function object(
   properties: { name: string; value: Expression }[],
-): Expression {
-  return { type: "ObjectExpression", properties };
+): ObjectLiteral {
+  return new ObjectLiteral(properties);
 }
 
-export function number(value: number): Expression {
-  return { type: "NumberLiteralExpression", value };
+export function number(value: number): NumberLiteral {
+  return new NumberLiteral(value);
 }
 
-export function identifier(name: string): Expression {
-  return { type: "IdentifierExpression", name };
+export function identifier(name: string): Identifier {
+  return new Identifier(name);
 }
 
 export function binary(
   operator: "<" | ">" | "+",
   left: Expression,
   right: Expression,
-): Expression {
+): Binary {
   const mapped_operator = operator === "<"
     ? "LessThan"
     : operator === ">"
     ? "GreaterThan"
     : "Plus";
-  return { type: "BinaryExpression", operator: mapped_operator, left, right };
+  return new Binary(mapped_operator, left, right);
 }
 
 export function call(
   callee: Expression,
   args: Expression[],
-): Extract<Expression, { type: "CallExpression" }> {
-  return { type: "CallExpression", callee, args };
+): Call {
+  return new Call(callee, args);
 }
 
-export function nil(): Expression {
-  return { type: "NilLiteralExpression" };
+export function nil(): NilLiteral {
+  return new NilLiteral();
 }
 
-export function lambda(parameters: string[], body: Statement[]): Expression {
-  return { type: "LambdaExpression", parameters, body };
+export function lambda(parameters: string[], body: Statement[]): Lambda {
+  return new Lambda(body, parameters);
 }
 
-export function channel_receive(channel: Expression): Expression {
-  return { type: "ChannelReceiveExpression", channel };
+export function channel_receive(channel: Expression): ChannelReceive {
+  return new ChannelReceive(channel);
 }
 
 export function channel_send(
   channel: Expression,
   value: Expression,
-): Statement {
-  return { type: "ChannelSendStatement", channel, value };
+): ChannelSend {
+  return new ChannelSend(channel, value);
 }
 
 export function spawn(
-  spawnee: Extract<Expression, { type: "CallExpression" }>,
-): Statement {
-  return { type: "SpawnStatement", spawnee };
+  spawnee: Call,
+): Spawn {
+  return new Spawn(spawnee);
 }
 
-export function yield_(): Statement {
-  return { type: "YieldStatement" };
+export function yield_(): Yield {
+  return new Yield();
 }
 
-export function print(expression: Expression): Statement {
-  return { type: "PrintStatement", expression };
+export function print(expression: Expression): Print {
+  return new Print(expression);
 }
 
-export function while_(condition: Expression, body: Statement[]): Statement {
-  return { type: "WhileStatement", condition, body };
+export function while_(condition: Expression, body: Statement[]): While {
+  return new While(condition, body);
 }
 
-export function expression_statement(expression: Expression): Statement {
-  return { type: "ExpressionStatement", expression };
+export function expression_statement(
+  expression: Expression,
+): ExpressionStatement {
+  return new ExpressionStatement(expression);
 }
 
 export function variable_declaration(
   name: string,
   initializer: Expression,
-): Statement {
-  return { type: "VariableDeclarationStatement", name, initializer };
+): VariableDeclaration {
+  return new VariableDeclaration(name, initializer);
 }
 
-export function assignment(name: string, value: Expression): Statement {
-  return { type: "AssignmentStatement", name, value };
+export function assignment(name: string, value: Expression): Assignment {
+  return new Assignment(name, value);
 }
 
-export function return_(expression: Expression): Statement {
-  return { type: "ReturnStatement", expression };
+export function return_(expression: Expression): Return {
+  return new Return(expression);
 }
 
 export function if_(
   condition: Expression,
   then_branch: Statement[],
   else_branch: Statement[],
-): Extract<Statement, { type: "IfStatement" }> {
-  return { type: "IfStatement", condition, then_branch, else_branch };
+): If {
+  return new If(condition, then_branch, else_branch);
 }
 
-export function boolean(value: boolean): Expression {
-  return { type: "BooleanLiteralExpression", value };
+export function boolean(value: boolean): BooleanLiteral {
+  return new BooleanLiteral(value);
 }
 
-export function block(statements: Statement[]): Statement {
-  return { type: "BlockStatement", statements };
+export function block(statements: Statement[]): Block {
+  return new Block(statements);
 }

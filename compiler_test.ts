@@ -1,5 +1,5 @@
 import { assertEquals } from "https://deno.land/std@0.192.0/testing/asserts.ts";
-import { Statement } from "./ast.ts";
+import { If, Statement } from "./ast.ts";
 import {
   assignment,
   binary,
@@ -21,6 +21,7 @@ import {
 } from "./ast_builder.ts";
 import { Compiler } from "./compiler.ts";
 import { Parser } from "./parser.ts";
+import * as value from "./value.ts";
 
 Deno.test("compiler_test", async (t) => {
   await t.step("Compiles expressions", async (t) => {
@@ -29,27 +30,27 @@ Deno.test("compiler_test", async (t) => {
       const instructions = compiler.compile_expression(boolean(true));
       assertEquals(instructions, [{
         type: "Push",
-        value: { type: "Boolean", value: true },
+        value: new value.BooleanValue(true),
       }]);
 
       const instructions2 = compiler.compile_expression(boolean(false));
       assertEquals(instructions2, [{
         type: "Push",
-        value: { type: "Boolean", value: false },
+        value: new value.BooleanValue(false),
       }]);
     });
     await t.step("Compiles nil expressions", () => {
       const compiler = new Compiler();
       const instructions = compiler.compile_expression(nil());
       assertEquals(instructions, [
-        { type: "Push", value: { type: "Nil" } },
+        { type: "Push", value: new value.Nil() },
       ]);
     });
     await t.step("Compiles number expressions", () => {
       const compiler = new Compiler();
       const instructions = compiler.compile_expression(number(10));
       assertEquals(instructions, [
-        { type: "Push", value: { type: "Number", value: 10 } },
+        { type: "Push", value: new value.NumberValue(10) },
       ]);
     });
     await t.step("Compiles binary expressions", () => {
@@ -58,8 +59,8 @@ Deno.test("compiler_test", async (t) => {
         binary("+", number(10), number(20)),
       );
       assertEquals(instructions, [
-        { type: "Push", value: { type: "Number", value: 10 } },
-        { type: "Push", value: { type: "Number", value: 20 } },
+        { type: "Push", value: new value.NumberValue(10) },
+        { type: "Push", value: new value.NumberValue(20) },
         { type: "Plus" },
       ]);
     });
@@ -74,8 +75,8 @@ Deno.test("compiler_test", async (t) => {
         call(identifier("Plus"), [number(10), number(20)]),
       );
       assertEquals(instructions, [
-        { type: "Push", value: { type: "Number", value: 10 } },
-        { type: "Push", value: { type: "Number", value: 20 } },
+        { type: "Push", value: new value.NumberValue(10) },
+        { type: "Push", value: new value.NumberValue(20) },
         { type: "GetLocal", name: "Plus" },
         { type: "Call", arity: 2 },
       ]);
@@ -88,7 +89,7 @@ Deno.test("compiler_test", async (t) => {
       const instructions = compiler.compile([statement]);
       assertEquals(instructions, [
         { type: "BlockStart" },
-        { type: "Push", value: { type: "Number", value: 10 } },
+        { type: "Push", value: new value.NumberValue(10) },
         { type: "Print" },
         { type: "BlockEnd" },
       ]);
@@ -103,7 +104,7 @@ Deno.test("compiler_test", async (t) => {
           { type: "BlockStart" },
           { type: "GetLocal", name: "x" },
           { type: "JumpIfFalse", offset: then_body.length + 1 },
-          { type: "Push", value: { type: "Number", value: 10 } },
+          { type: "Push", value: new value.NumberValue(10) },
           { type: "Print" },
           { type: "Jump", offset: 0 },
           { type: "BlockEnd" },
@@ -111,10 +112,7 @@ Deno.test("compiler_test", async (t) => {
       });
       await t.step("if with else", () => {
         const source = "if x { print 10; } else { print 20; }";
-        const statement = new Parser().parse(source)[0] as Extract<
-          Statement,
-          { type: "IfStatement" }
-        >;
+        const statement = new Parser().parse(source)[0] as If;
         const compiler = new Compiler();
         const then_body = compiler.compile(statement.then_branch);
         const else_body = compiler.compile(statement.else_branch!);
@@ -123,10 +121,10 @@ Deno.test("compiler_test", async (t) => {
           { type: "BlockStart" },
           { type: "GetLocal", name: "x" },
           { type: "JumpIfFalse", offset: then_body.length + 1 },
-          { type: "Push", value: { type: "Number", value: 10 } },
+          { type: "Push", value: new value.NumberValue(10) },
           { type: "Print" },
           { type: "Jump", offset: else_body.length },
-          { type: "Push", value: { type: "Number", value: 20 } },
+          { type: "Push", value: new value.NumberValue(20) },
           { type: "Print" },
           { type: "BlockEnd" },
         ]);
@@ -143,11 +141,11 @@ Deno.test("compiler_test", async (t) => {
       assertEquals(instructions, [
         { type: "BlockStart" },
         { type: "GetLocal", name: "x" },
-        { type: "Push", value: { type: "Number", value: 10 } },
+        { type: "Push", value: new value.NumberValue(10) },
         { type: "LessThan" },
         { type: "JumpIfFalse", offset: 5 },
         { type: "GetLocal", name: "x" },
-        { type: "Push", value: { type: "Number", value: 1 } },
+        { type: "Push", value: new value.NumberValue(1) },
         { type: "Plus" },
         { type: "SetLocal", name: "x" },
         { type: "Jump", offset: -9 },
@@ -160,7 +158,7 @@ Deno.test("compiler_test", async (t) => {
         expression_statement(number(10)),
       ]);
       assertEquals(instructions, [
-        { type: "Push", value: { type: "Number", value: 10 } },
+        { type: "Push", value: new value.NumberValue(10) },
         { type: "Pop" },
       ]);
     });
@@ -168,7 +166,7 @@ Deno.test("compiler_test", async (t) => {
       const compiler = new Compiler();
       const instructions = compiler.compile([return_(number(10))]);
       assertEquals(instructions, [
-        { type: "Push", value: { type: "Number", value: 10 } },
+        { type: "Push", value: new value.NumberValue(10) },
         { type: "Return" },
       ]);
     });
@@ -180,19 +178,18 @@ Deno.test("compiler_test", async (t) => {
       );
       const instructions = compiler.compile([expression]);
       assertEquals(instructions, [
-        { type: "Push", value: { type: "Number", value: 10 } },
+        { type: "Push", value: new value.NumberValue(10) },
         {
           type: "Push",
-          value: {
-            type: "Function",
-            parameters: ["x"],
-            body: [
+          value: new value.FunctionValue(
+            ["x"],
+            [
               { type: "GetLocal", name: "x" },
               { type: "Print" },
-              { type: "Push", value: { type: "Nil" } },
+              { type: "Push", value: new value.Nil() },
               { type: "Return" },
             ],
-          },
+          ),
         },
         { type: "Spawn", arity: 1 },
       ]);
@@ -206,7 +203,7 @@ Deno.test("compiler_test", async (t) => {
       const compiler = new Compiler();
       const instructions = compiler.compile([print(number(10))]);
       assertEquals(instructions, [
-        { type: "Push", value: { type: "Number", value: 10 } },
+        { type: "Push", value: new value.NumberValue(10) },
         { type: "Print" },
       ]);
     });
@@ -216,7 +213,7 @@ Deno.test("compiler_test", async (t) => {
         variable_declaration("x", number(10)),
       ]);
       assertEquals(instructions, [
-        { type: "Push", value: { type: "Number", value: 10 } },
+        { type: "Push", value: new value.NumberValue(10) },
         { type: "DeclareLocal", name: "x" },
       ]);
     });
@@ -226,7 +223,7 @@ Deno.test("compiler_test", async (t) => {
         assignment("x", number(10)),
       ]);
       assertEquals(instructions, [
-        { type: "Push", value: { type: "Number", value: 10 } },
+        { type: "Push", value: new value.NumberValue(10) },
         { type: "SetLocal", name: "x" },
       ]);
     });

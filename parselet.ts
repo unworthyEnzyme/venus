@@ -1,6 +1,7 @@
 import { Expression, Statement, Token } from "./ast.ts";
 import { lambda } from "./ast_builder.ts";
 import { Parser, Precedence } from "./parser.ts";
+import * as ast from "./ast.ts";
 
 export interface PrefixParselet {
   parse(parser: Parser, token: Token): Expression;
@@ -13,14 +14,9 @@ export interface InfixParselet {
 
 export class NumberParselet implements PrefixParselet {
   parse(_parser: Parser, token: Token): Expression {
-    return { type: "NumberLiteralExpression", value: Number(token.lexeme) };
+    return new ast.NumberLiteral(+token.lexeme);
   }
 }
-
-type BinaryOperator = Extract<
-  Expression,
-  { type: "BinaryExpression" }
->["operator"];
 
 export class BinaryExpressionParselet implements InfixParselet {
   private _precedence: number;
@@ -30,12 +26,11 @@ export class BinaryExpressionParselet implements InfixParselet {
 
   parse(parser: Parser, left: Expression, token: Token): Expression {
     const right = parser.parse_expression(this.precedence());
-    return {
-      type: "BinaryExpression",
-      operator: this.to_operator(token),
+    return new ast.Binary(
+      this.to_operator(token),
       left,
       right,
-    };
+    );
   }
 
   precedence(): number {
@@ -44,7 +39,7 @@ export class BinaryExpressionParselet implements InfixParselet {
 
   private to_operator(
     token: Token,
-  ): BinaryOperator {
+  ): ast.BinaryOperator {
     switch (token.type) {
       case "LessThan":
       case "GreaterThan":
@@ -61,40 +56,33 @@ export class BinaryExpressionParselet implements InfixParselet {
 export class ChannelReceive implements PrefixParselet {
   parse(parser: Parser, _token: Token): Expression {
     const channel = parser.parse_expression();
-    return {
-      type: "ChannelReceiveExpression",
-      channel,
-    };
+    return new ast.ChannelReceive(channel);
   }
 }
 
 export class IdentifierParselet implements PrefixParselet {
   parse(_parser: Parser, token: Token): Expression {
-    return { type: "IdentifierExpression", name: token.lexeme };
+    return new ast.Identifier(token.lexeme);
   }
 }
 
 export class StringParselet implements PrefixParselet {
   parse(_parser: Parser, token: Token): Expression {
     const value = token.lexeme.substring(1, token.lexeme.length - 1);
-    return { type: "StringLiteralExpression", value };
+    return new ast.StringLiteral(value);
   }
 }
 
 export class NilParselet implements PrefixParselet {
   parse(_parser: Parser, _token: Token): Expression {
-    return { type: "NilLiteralExpression" };
+    return new ast.NilLiteral();
   }
 }
 
 export class PropertyAccessParselet implements InfixParselet {
   parse(parser: Parser, left: Expression, _token: Token): Expression {
     const property = parser.consume("Identifier");
-    return {
-      type: "PropertyAccessExpression",
-      object: left,
-      name: property.lexeme,
-    };
+    return new ast.PropertyAccess(left, property.lexeme);
   }
 
   precedence(): number {
@@ -107,11 +95,7 @@ export class CallParselet implements InfixParselet {
     const args = parser.parse_delimited("Comma", "RightParen", () => {
       return parser.parse_expression();
     });
-    return {
-      type: "CallExpression",
-      callee: left,
-      args,
-    };
+    return new ast.Call(left, args);
   }
 
   precedence(): number {
@@ -143,21 +127,18 @@ export class ObjectLiteralParselet implements PrefixParselet {
       const value = parser.parse_expression();
       return { name, value };
     });
-    return {
-      type: "ObjectExpression",
-      properties,
-    };
+    return new ast.ObjectLiteral(properties);
   }
 }
 
 export class TrueLiteralParselet implements PrefixParselet {
   parse(_parser: Parser, _token: Token): Expression {
-    return { type: "BooleanLiteralExpression", value: true };
+    return ast.BooleanLiteral.TRUE;
   }
 }
 
 export class FalseLiteralParselet implements PrefixParselet {
   parse(_parser: Parser, _token: Token): Expression {
-    return { type: "BooleanLiteralExpression", value: false };
+    return ast.BooleanLiteral.FALSE;
   }
 }

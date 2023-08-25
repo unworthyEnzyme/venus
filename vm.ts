@@ -1,50 +1,52 @@
 import { Compiler } from "./compiler.ts";
 import { Channel, Fiber } from "./concurrency.ts";
 import { Parser } from "./parser.ts";
-import { to_string, Value } from "./value.ts";
+import {
+  BooleanValue,
+  FunctionValue,
+  NativeFunction,
+  Nil,
+  NumberValue,
+  ObjectValue,
+  StringValue,
+  Value,
+} from "./value.ts";
 
 export class VM {
   private fiber_queue: Fiber[] = [];
   public current_fiber: Fiber | null = null;
   private globals = new Map<string, Value>();
   constructor() {
-    this.globals.set("prompt", {
-      type: "NativeFunction",
-      arity: 1,
-      name: "prompt",
-      fn: (message: Value) => {
-        if (message.type !== "String") {
-          throw new Error("Expected string as an argument to `prompt`");
-        }
-        const input = prompt(message.value);
-        if (input === null) {
-          return { type: "Nil" };
-        }
-        return { type: "String", value: input };
-      },
-    });
-    this.globals.set("meaning_of_life", {
-      type: "NativeFunction",
-      arity: 0,
-      name: "meaning_of_life",
-      fn: () => {
-        return { type: "Number", value: 42 };
-      },
-    });
-    this.globals.set("new_channel", {
-      type: "NativeFunction",
-      arity: 0,
-      name: "new_channel",
-      fn: (capacity: Value) => {
-        if (capacity.type !== "Number") {
-          throw new Error("Expected number");
-        }
-        return {
-          type: "Channel",
-          channel: new Channel(capacity.value),
-        };
-      },
-    });
+    this.globals.set(
+      "prompt",
+      new NativeFunction(
+        "prompt",
+        1,
+        (message: Value) => {
+          if (!message.is(StringValue)) {
+            throw new Error("Expected string as an argument to `prompt`");
+          }
+          const input = prompt(message.value);
+          if (input === null) {
+            return new Nil();
+          }
+          return new StringValue(input);
+        },
+      ),
+    );
+    this.globals.set(
+      "new_channel",
+      new NativeFunction(
+        "new_channel",
+        1,
+        (capacity: Value) => {
+          if (!capacity.is(NumberValue)) {
+            throw new Error("Expected number");
+          }
+          return new Channel(capacity.value);
+        },
+      ),
+    );
   }
   run(source: string) {
     const program = new Parser().parse(source);
@@ -68,30 +70,24 @@ export class VM {
           case "GreaterThanEqual": {
             const b = this.current_fiber.value_stack.pop();
             const a = this.current_fiber.value_stack.pop();
-            if (a?.type !== "Number" || b?.type !== "Number") {
+            if (!a?.is(NumberValue) || !b?.is(NumberValue)) {
               throw new Error("Expected number");
             }
-            this.current_fiber.value_stack.push({
-              type: "Boolean",
-              value: a.value >= b.value,
-            });
+            this.current_fiber.value_stack.push(new BooleanValue(a >= b));
             break;
           }
           case "LessThanEqual": {
             const b = this.current_fiber.value_stack.pop();
             const a = this.current_fiber.value_stack.pop();
-            if (a?.type !== "Number" || b?.type !== "Number") {
+            if (!a?.is(NumberValue) || !b?.is(NumberValue)) {
               throw new Error("Expected number");
             }
-            this.current_fiber.value_stack.push({
-              type: "Boolean",
-              value: a.value <= b.value,
-            });
+            this.current_fiber.value_stack.push(new BooleanValue(a <= b));
             break;
           }
           case "AccessProperty": {
             const object = this.current_fiber.value_stack.pop();
-            if (object?.type !== "Object") {
+            if (!object?.is(ObjectValue)) {
               throw new Error("Expected object");
             }
             const value = object.properties[instruction.name];
@@ -109,7 +105,7 @@ export class VM {
               throw new Error("Expected value");
             }
             const object = this.current_fiber.value_stack.pop();
-            if (object?.type !== "Object") {
+            if (!object?.is(ObjectValue)) {
               throw new Error("Expected object");
             }
             object.properties[instruction.name] = value;
@@ -119,21 +115,21 @@ export class VM {
           case "ChannelSend": {
             const channel = this.current_fiber.value_stack.pop();
             const value = this.current_fiber.value_stack.pop();
-            if (channel?.type !== "Channel") {
+            if (!channel?.is(Channel)) {
               throw new Error("Expected channel");
             }
             if (value === undefined) {
               throw new Error("Expected value");
             }
-            channel.channel.send(this, value);
+            channel.send(this, value);
             break;
           }
           case "ChannelReceive": {
             const channel = this.current_fiber.value_stack.pop();
-            if (channel?.type !== "Channel") {
+            if (!channel?.is(Channel)) {
               throw new Error("Expected channel");
             }
-            channel.channel.receive(this);
+            channel.receive(this);
             break;
           }
           case "Exit": {
@@ -156,12 +152,12 @@ export class VM {
             if (!value) {
               throw new Error("Must have a value to print");
             }
-            console.log(to_string(value));
+            console.log(value.toString());
             break;
           }
           case "JumpIfFalse": {
             const value = this.current_fiber.value_stack.pop();
-            if (value?.type !== "Boolean") {
+            if (!value?.is(BooleanValue)) {
               throw new Error("Expected boolean");
             }
             if (!value.value) {
@@ -172,37 +168,30 @@ export class VM {
           case "Plus": {
             const a = this.current_fiber.value_stack.pop();
             const b = this.current_fiber.value_stack.pop();
-            if (a?.type !== "Number" || b?.type !== "Number") {
+            if (!a?.is(NumberValue) || !b?.is(NumberValue)) {
               throw new Error("Expected number");
             }
-            this.current_fiber.value_stack.push({
-              type: "Number",
-              value: a.value + b.value,
-            });
+            this.current_fiber.value_stack.push(
+              new NumberValue(a.value + b.value),
+            );
             break;
           }
           case "LessThan": {
             const b = this.current_fiber.value_stack.pop();
             const a = this.current_fiber.value_stack.pop();
-            if (a?.type !== "Number" || b?.type !== "Number") {
+            if (!a?.is(NumberValue) || !b?.is(NumberValue)) {
               throw new Error("Expected number");
             }
-            this.current_fiber.value_stack.push({
-              type: "Boolean",
-              value: a.value < b.value,
-            });
+            this.current_fiber.value_stack.push(new BooleanValue(a < b));
             break;
           }
           case "GreaterThan": {
             const b = this.current_fiber.value_stack.pop();
             const a = this.current_fiber.value_stack.pop();
-            if (a?.type !== "Number" || b?.type !== "Number") {
+            if (!a?.is(NumberValue) || !b?.is(NumberValue)) {
               throw new Error("Expected number");
             }
-            this.current_fiber.value_stack.push({
-              type: "Boolean",
-              value: a.value > b.value,
-            });
+            this.current_fiber.value_stack.push(new BooleanValue(a > b));
             break;
           }
           case "Return": {
@@ -271,7 +260,7 @@ export class VM {
           }
           case "Call": {
             const callee = this.current_fiber.value_stack.pop();
-            if (callee?.type === "Function") {
+            if (callee?.is(FunctionValue)) {
               const locals = new Map<string, Value>();
               const parameters = callee.parameters.toReversed();
               for (const name of parameters) {
@@ -286,7 +275,7 @@ export class VM {
                 instructions: callee.body,
                 locals: [locals],
               });
-            } else if (callee?.type === "NativeFunction") {
+            } else if (callee?.is(NativeFunction)) {
               const args: Value[] = [];
               for (let i = 0; i < callee.arity; i++) {
                 const arg = this.current_fiber.value_stack.pop();
@@ -313,7 +302,7 @@ export class VM {
           }
           case "Spawn": {
             const callee = this.current_fiber.value_stack.pop();
-            if (callee?.type !== "Function") {
+            if (!callee?.is(FunctionValue)) {
               throw new Error("Expected function");
             }
             const locals = new Map<string, Value>();
