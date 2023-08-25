@@ -1,5 +1,13 @@
 import * as ast from "./ast.ts";
 import { Instruction } from "./instruction.ts";
+import {
+  BooleanValue,
+  FunctionValue,
+  Nil,
+  NumberValue,
+  ObjectValue,
+  StringValue,
+} from "./value.ts";
 
 export class Compiler {
   compile(statements: ast.Statement[]): Instruction[] {
@@ -107,7 +115,7 @@ export class Compiler {
     if (expression.is(ast.BooleanLiteral)) {
       instructions.push({
         type: "Push",
-        value: { type: "Boolean", value: expression.value },
+        value: new BooleanValue(expression.value),
       });
     } else if (expression.is(ast.Binary)) {
       instructions.push(...this.compile_expression(expression.left));
@@ -150,22 +158,18 @@ export class Compiler {
         (instruction) => instruction.type === "Return",
       );
       if (!doesItHaveReturn) {
-        body.push({ type: "Push", value: { type: "Nil" } });
+        body.push({ type: "Push", value: new Nil() });
         body.push({ type: "Return" });
       }
 
       instructions.push({
         type: "Push",
-        value: {
-          type: "Function",
-          parameters: expression.parameters,
-          body: body,
-        },
+        value: new FunctionValue(expression.parameters, body),
       });
     } else if (expression.is(ast.StringLiteral)) {
       instructions.push({
         type: "Push",
-        value: { type: "String", value: expression.value },
+        value: new StringValue(expression.value),
       });
     } else if (expression.is(ast.PropertyAccess)) {
       instructions.push(
@@ -178,7 +182,7 @@ export class Compiler {
     } else if (expression.is(ast.ObjectLiteral)) {
       instructions.push({
         type: "Push",
-        value: { type: "Object", properties: {} },
+        value: new ObjectValue({}),
       });
       for (const property of expression.properties) {
         instructions.push(
@@ -197,12 +201,12 @@ export class Compiler {
     } else if (expression.is(ast.NumberLiteral)) {
       instructions.push({
         type: "Push",
-        value: { type: "Number", value: expression.value },
+        value: new NumberValue(expression.value),
       });
     } else if (expression.is(ast.NilLiteral)) {
       instructions.push({
         type: "Push",
-        value: { type: "Nil" },
+        value: new Nil(),
       });
     }
     return instructions;

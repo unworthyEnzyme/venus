@@ -1,5 +1,5 @@
 import type { Instruction } from "./instruction.ts";
-import type { Value } from "./value.ts";
+import { Value } from "./value.ts";
 import type { VM } from "./vm.ts";
 
 export class Fiber {
@@ -16,11 +16,13 @@ type StackFrame = {
   locals: Map<string, Value>[];
 };
 
-export class Channel {
+export class Channel extends Value {
   private receivers: Fiber[] = [];
   private sends: Value[] = [];
   private buffer: Value[] = [];
-  constructor(private capacity: number) {}
+  constructor(private capacity: number) {
+    super();
+  }
   send(vm: VM, value: Value) {
     const receiver = this.receivers.shift();
     if (receiver) {
@@ -49,5 +51,9 @@ export class Channel {
     }
     this.receivers.push(vm.current_fiber!);
     vm.yield_current_fiber();
+  }
+
+  toString(): string {
+    return `<channel ${this.capacity}>`;
   }
 }
