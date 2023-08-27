@@ -75,7 +75,7 @@ export class Parser {
     }
     if (this.match("Spawn")) {
       const spawnee = this.parse_expression();
-      if (!spawnee.is(Call)) {
+      if (!(spawnee instanceof Call)) {
         throw new Error(`Expected call expression, got ${spawnee}`);
       }
       this.consume("Semicolon");
@@ -121,7 +121,7 @@ export class Parser {
     }
     if (this.match("Equal")) {
       const value = this.parse_expression();
-      if (!expr.is(Identifier)) {
+      if (!(expr instanceof Identifier)) {
         throw new Error(`Expected identifier expression, got ${value}`);
       }
       this.consume("Semicolon");

@@ -23,7 +23,7 @@ export class VM {
         "prompt",
         1,
         (message: Value) => {
-          if (!message.is(StringValue)) {
+          if (!(message instanceof StringValue)) {
             throw new Error("Expected string as an argument to `prompt`");
           }
           const input = prompt(message.value);
@@ -40,7 +40,7 @@ export class VM {
         "new_channel",
         1,
         (capacity: Value) => {
-          if (!capacity.is(NumberValue)) {
+          if (!(capacity instanceof NumberValue)) {
             throw new Error("Expected number");
           }
           return new Channel(capacity.value);
@@ -70,7 +70,7 @@ export class VM {
           case "GreaterThanEqual": {
             const b = this.current_fiber.value_stack.pop();
             const a = this.current_fiber.value_stack.pop();
-            if (!a?.is(NumberValue) || !b?.is(NumberValue)) {
+            if (!(a instanceof NumberValue) || !(b instanceof NumberValue)) {
               throw new Error("Expected number");
             }
             this.current_fiber.value_stack.push(new BooleanValue(a >= b));
@@ -79,7 +79,7 @@ export class VM {
           case "LessThanEqual": {
             const b = this.current_fiber.value_stack.pop();
             const a = this.current_fiber.value_stack.pop();
-            if (!a?.is(NumberValue) || !b?.is(NumberValue)) {
+            if (!(a instanceof NumberValue) || !(b instanceof NumberValue)) {
               throw new Error("Expected number");
             }
             this.current_fiber.value_stack.push(new BooleanValue(a <= b));
@@ -87,7 +87,7 @@ export class VM {
           }
           case "AccessProperty": {
             const object = this.current_fiber.value_stack.pop();
-            if (!object?.is(ObjectValue)) {
+            if (!(object instanceof ObjectValue)) {
               throw new Error("Expected object");
             }
             const value = object.properties[instruction.name];
@@ -105,7 +105,7 @@ export class VM {
               throw new Error("Expected value");
             }
             const object = this.current_fiber.value_stack.pop();
-            if (!object?.is(ObjectValue)) {
+            if (!(object instanceof ObjectValue)) {
               throw new Error("Expected object");
             }
             object.properties[instruction.name] = value;
@@ -115,7 +115,7 @@ export class VM {
           case "ChannelSend": {
             const channel = this.current_fiber.value_stack.pop();
             const value = this.current_fiber.value_stack.pop();
-            if (!channel?.is(Channel)) {
+            if (!(channel instanceof Channel)) {
               throw new Error("Expected channel");
             }
             if (value === undefined) {
@@ -126,7 +126,7 @@ export class VM {
           }
           case "ChannelReceive": {
             const channel = this.current_fiber.value_stack.pop();
-            if (!channel?.is(Channel)) {
+            if (!(channel instanceof Channel)) {
               throw new Error("Expected channel");
             }
             channel.receive(this);
@@ -157,7 +157,7 @@ export class VM {
           }
           case "JumpIfFalse": {
             const value = this.current_fiber.value_stack.pop();
-            if (!value?.is(BooleanValue)) {
+            if (!(value instanceof BooleanValue)) {
               throw new Error("Expected boolean");
             }
             if (!value.value) {
@@ -168,7 +168,7 @@ export class VM {
           case "Plus": {
             const a = this.current_fiber.value_stack.pop();
             const b = this.current_fiber.value_stack.pop();
-            if (!a?.is(NumberValue) || !b?.is(NumberValue)) {
+            if (!(a instanceof NumberValue) || !(b instanceof NumberValue)) {
               throw new Error("Expected number");
             }
             this.current_fiber.value_stack.push(
@@ -179,7 +179,7 @@ export class VM {
           case "LessThan": {
             const b = this.current_fiber.value_stack.pop();
             const a = this.current_fiber.value_stack.pop();
-            if (!a?.is(NumberValue) || !b?.is(NumberValue)) {
+            if (!(a instanceof NumberValue) || !(b instanceof NumberValue)) {
               throw new Error("Expected number");
             }
             this.current_fiber.value_stack.push(new BooleanValue(a < b));
@@ -188,7 +188,7 @@ export class VM {
           case "GreaterThan": {
             const b = this.current_fiber.value_stack.pop();
             const a = this.current_fiber.value_stack.pop();
-            if (!a?.is(NumberValue) || !b?.is(NumberValue)) {
+            if (!(a instanceof NumberValue) || !(b instanceof NumberValue)) {
               throw new Error("Expected number");
             }
             this.current_fiber.value_stack.push(new BooleanValue(a > b));
@@ -260,7 +260,7 @@ export class VM {
           }
           case "Call": {
             const callee = this.current_fiber.value_stack.pop();
-            if (callee?.is(FunctionValue)) {
+            if (callee instanceof FunctionValue) {
               const locals = new Map<string, Value>();
               const parameters = callee.parameters.toReversed();
               for (const name of parameters) {
@@ -275,7 +275,7 @@ export class VM {
                 instructions: callee.body,
                 locals: [locals],
               });
-            } else if (callee?.is(NativeFunction)) {
+            } else if (callee instanceof NativeFunction) {
               const args: Value[] = [];
               for (let i = 0; i < callee.arity; i++) {
                 const arg = this.current_fiber.value_stack.pop();
@@ -302,7 +302,7 @@ export class VM {
           }
           case "Spawn": {
             const callee = this.current_fiber.value_stack.pop();
-            if (!callee?.is(FunctionValue)) {
+            if (!(callee instanceof FunctionValue)) {
               throw new Error("Expected function");
             }
             const locals = new Map<string, Value>();

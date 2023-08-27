@@ -1,11 +1,5 @@
 export abstract class Expression {
   abstract toString(): string;
-  is<T extends Expression>(
-    // deno-lint-ignore no-explicit-any
-    c: new (...args: any[]) => T,
-  ): this is InstanceType<typeof c> {
-    return this instanceof c;
-  }
 }
 
 export class NumberLiteral extends Expression {
@@ -134,12 +128,6 @@ export class ChannelReceive extends Expression {
 
 export abstract class Statement {
   abstract toString(): string;
-  is<T extends Statement>(
-    // deno-lint-ignore no-explicit-any
-    c: new (...args: any[]) => T,
-  ): this is InstanceType<typeof c> {
-    return this instanceof c;
-  }
 }
 
 export class Block extends Statement {

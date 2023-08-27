@@ -1,11 +1,6 @@
 import type { Instruction } from "./instruction.ts";
 
 export abstract class Value {
-  // deno-lint-ignore no-explicit-any
-  is<T extends Value>(type: new (...args: any) => T): this is T {
-    return this instanceof type;
-  }
-
   abstract toString(): string;
 }
 

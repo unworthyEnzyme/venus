@@ -13,16 +13,16 @@ export class Compiler {
   compile(statements: ast.Statement[]): Instruction[] {
     const instructions: Instruction[] = [];
     for (const statement of statements) {
-      if (statement.is(ast.Block)) {
+      if (statement instanceof ast.Block) {
         instructions.push({ type: "BlockStart" });
         instructions.push(...this.compile(statement.statements));
         instructions.push({ type: "BlockEnd" });
-      } else if (statement.is(ast.Print)) {
+      } else if (statement instanceof ast.Print) {
         instructions.push(
           ...this.compile_expression(statement.expression),
         );
         instructions.push({ type: "Print" });
-      } else if (statement.is(ast.While)) {
+      } else if (statement instanceof ast.While) {
         instructions.push({ type: "BlockStart" });
         const loop_expression = this.compile_expression(
           statement.condition,
@@ -43,7 +43,7 @@ export class Compiler {
           ),
         });
         instructions.push({ type: "BlockEnd" });
-      } else if (statement.is(ast.VariableDeclaration)) {
+      } else if (statement instanceof ast.VariableDeclaration) {
         instructions.push(
           ...this.compile_expression(statement.initializer),
         );
@@ -51,7 +51,7 @@ export class Compiler {
           type: "DeclareLocal",
           name: statement.name,
         });
-      } else if (statement.is(ast.Assignment)) {
+      } else if (statement instanceof ast.Assignment) {
         instructions.push(
           ...this.compile_expression(statement.value),
         );
@@ -59,7 +59,7 @@ export class Compiler {
           type: "SetLocal",
           name: statement.name,
         });
-      } else if (statement.is(ast.If)) {
+      } else if (statement instanceof ast.If) {
         instructions.push({ type: "BlockStart" });
         instructions.push(...this.compile_expression(statement.condition));
         const then_branch = this.compile(statement.then_branch);
@@ -75,7 +75,7 @@ export class Compiler {
         });
         instructions.push(...else_branch);
         instructions.push({ type: "BlockEnd" });
-      } else if (statement.is(ast.ChannelSend)) {
+      } else if (statement instanceof ast.ChannelSend) {
         instructions.push(
           ...this.compile_expression(statement.value),
         );
@@ -83,17 +83,17 @@ export class Compiler {
           ...this.compile_expression(statement.channel),
         );
         instructions.push({ type: "ChannelSend" });
-      } else if (statement.is(ast.ExpressionStatement)) {
+      } else if (statement instanceof ast.ExpressionStatement) {
         instructions.push(
           ...this.compile_expression(statement.expression),
         );
         instructions.push({ type: "Pop" });
-      } else if (statement.is(ast.Return)) {
+      } else if (statement instanceof ast.Return) {
         instructions.push(
           ...this.compile_expression(statement.expression),
         );
         instructions.push({ type: "Return" });
-      } else if (statement.is(ast.Spawn)) {
+      } else if (statement instanceof ast.Spawn) {
         for (const arg of statement.spawnee.args) {
           instructions.push(...this.compile_expression(arg));
         }
@@ -104,7 +104,7 @@ export class Compiler {
           type: "Spawn",
           arity: statement.spawnee.args.length,
         });
-      } else if (statement.is(ast.Yield)) {
+      } else if (statement instanceof ast.Yield) {
         instructions.push({ type: "Yield" });
       }
     }
@@ -112,12 +112,12 @@ export class Compiler {
   }
   compile_expression(expression: ast.Expression): Instruction[] {
     const instructions: Instruction[] = [];
-    if (expression.is(ast.BooleanLiteral)) {
+    if (expression instanceof ast.BooleanLiteral) {
       instructions.push({
         type: "Push",
         value: new BooleanValue(expression.value),
       });
-    } else if (expression.is(ast.Binary)) {
+    } else if (expression instanceof ast.Binary) {
       instructions.push(...this.compile_expression(expression.left));
       instructions.push(...this.compile_expression(expression.right));
       switch (expression.operator) {
@@ -136,12 +136,12 @@ export class Compiler {
         case "LessThanEqual":
           instructions.push({ type: "LessThanEqual" });
       }
-    } else if (expression.is(ast.Identifier)) {
+    } else if (expression instanceof ast.Identifier) {
       instructions.push({
         type: "GetLocal",
         name: expression.name,
       });
-    } else if (expression.is(ast.Call)) {
+    } else if (expression instanceof ast.Call) {
       for (const arg of expression.args) {
         instructions.push(...this.compile_expression(arg));
       }
@@ -152,7 +152,7 @@ export class Compiler {
         type: "Call",
         arity: expression.args.length,
       });
-    } else if (expression.is(ast.Lambda)) {
+    } else if (expression instanceof ast.Lambda) {
       const body = this.compile(expression.body);
       const doesItHaveReturn = body.some(
         (instruction) => instruction.type === "Return",
@@ -166,12 +166,12 @@ export class Compiler {
         type: "Push",
         value: new FunctionValue(expression.parameters, body),
       });
-    } else if (expression.is(ast.StringLiteral)) {
+    } else if (expression instanceof ast.StringLiteral) {
       instructions.push({
         type: "Push",
         value: new StringValue(expression.value),
       });
-    } else if (expression.is(ast.PropertyAccess)) {
+    } else if (expression instanceof ast.PropertyAccess) {
       instructions.push(
         ...this.compile_expression(expression.object),
       );
@@ -179,7 +179,7 @@ export class Compiler {
         type: "AccessProperty",
         name: expression.name,
       });
-    } else if (expression.is(ast.ObjectLiteral)) {
+    } else if (expression instanceof ast.ObjectLiteral) {
       instructions.push({
         type: "Push",
         value: new ObjectValue({}),
@@ -193,17 +193,17 @@ export class Compiler {
           name: property.name,
         });
       }
-    } else if (expression.is(ast.ChannelReceive)) {
+    } else if (expression instanceof ast.ChannelReceive) {
       instructions.push(
         ...this.compile_expression(expression.channel),
       );
       instructions.push({ type: "ChannelReceive" });
-    } else if (expression.is(ast.NumberLiteral)) {
+    } else if (expression instanceof ast.NumberLiteral) {
       instructions.push({
         type: "Push",
         value: new NumberValue(expression.value),
       });
-    } else if (expression.is(ast.NilLiteral)) {
+    } else if (expression instanceof ast.NilLiteral) {
       instructions.push({
         type: "Push",
         value: new Nil(),
