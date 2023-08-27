@@ -1,4 +1,3 @@
-import type { Channel } from "./concurrency.ts";
 import type { Instruction } from "./instruction.ts";
 
 export abstract class Value {
