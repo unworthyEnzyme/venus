@@ -1,6 +1,7 @@
 import type { Value } from "./value.ts";
 
 export type Instruction =
+  | { type: "Minus" }
   | { type: "LessThanEqual" }
   | { type: "GreaterThanEqual" }
   | { type: "AccessProperty"; name: string }

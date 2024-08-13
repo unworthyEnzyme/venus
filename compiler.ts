@@ -131,6 +131,9 @@ export class Compiler {
       instructions.push(...this.compile_expression(expression.left));
       instructions.push(...this.compile_expression(expression.right));
       switch (expression.operator) {
+        case "Minus":
+          instructions.push({ type: "Minus" });
+          break;
         case "LessThan":
           instructions.push({ type: "LessThan" });
           break;

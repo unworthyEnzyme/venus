@@ -67,6 +67,17 @@ export class VM {
         }
         const instruction = frame.instructions[frame.ip++];
         switch (instruction.type) {
+          case "Minus": {
+            const b = this.current_fiber.value_stack.pop();
+            const a = this.current_fiber.value_stack.pop();
+            if (!(b instanceof NumberValue) || !(a instanceof NumberValue)) {
+              throw new Error("You can only subtract numbers.");
+            }
+            this.current_fiber.value_stack.push(
+              new NumberValue(a.value - b.value),
+            );
+            break;
+          }
           case "DeclareGlobal": {
             this.globals.set(instruction.name, new Nil());
             break;
@@ -206,7 +217,9 @@ export class VM {
             if (!(a instanceof NumberValue) || !(b instanceof NumberValue)) {
               throw new Error("Expected number");
             }
-            this.current_fiber.value_stack.push(new BooleanValue(a < b));
+            this.current_fiber.value_stack.push(
+              new BooleanValue(a.value < b.value),
+            );
             break;
           }
           case "GreaterThan": {

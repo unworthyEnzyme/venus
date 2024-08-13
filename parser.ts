@@ -47,6 +47,7 @@ export class Parser {
     this.register_binary("GreaterThan", Precedence.GREATER_THAN);
     this.register_binary("GreaterThanEqual", Precedence.GREATER_THAN_EQUAL);
     this.register_binary("LessThanEqual", Precedence.LESS_THAN_EQUAL);
+    this.register_binary("Minus", Precedence.SUM);
   }
   parse(source: string): Statement[] {
     const tokenizer = new Tokenizer(source);

@@ -41,6 +41,7 @@ export class BinaryExpressionParselet implements InfixParselet {
     token: Token,
   ): ast.BinaryOperator {
     switch (token.type) {
+      case "Minus":
       case "LessThan":
       case "GreaterThan":
       case "Plus":

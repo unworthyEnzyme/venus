@@ -23,6 +23,7 @@ export class StringLiteral extends Expression {
 }
 
 const binary_operators = [
+  "Minus",
   "Plus",
   "GreaterThan",
   "LessThan",
