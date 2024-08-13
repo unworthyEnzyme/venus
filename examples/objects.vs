@@ -3,7 +3,7 @@ let obj = {
   bar: {
     baz: 2
   },
-  f: fun(x) {
+  f: |x| {
     print x;
   }
 };

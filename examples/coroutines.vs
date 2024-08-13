@@ -1,4 +1,4 @@
-let print_numbers = fun(start, end) {
+let print_numbers = |start, end| {
     let i = start;
     while i < end + 1 {
         print i;

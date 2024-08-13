@@ -244,6 +244,7 @@ export class Assignment extends Statement {
 
 export type Token = { type: TokenType; lexeme: string };
 export type TokenType =
+  | "Pipe"
   | "If"
   | "Else"
   | "Colon"

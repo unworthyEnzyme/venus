@@ -105,8 +105,7 @@ export class CallParselet implements InfixParselet {
 
 export class LambdaParselet implements PrefixParselet {
   parse(parser: Parser, _token: Token): Expression {
-    parser.consume("LeftParen");
-    const params = parser.parse_delimited("Comma", "RightParen", () => {
+    const params = parser.parse_delimited("Comma", "Pipe", () => {
       return parser.consume("Identifier").lexeme;
     });
     parser.consume("LeftBrace");

@@ -34,7 +34,7 @@ export class Parser {
     this.register_prefix("True", new TrueLiteralParselet());
     this.register_prefix("False", new FalseLiteralParselet());
     this.register_prefix("LeftBrace", new ObjectLiteralParselet());
-    this.register_prefix("Fun", new LambdaParselet());
+    this.register_prefix("Pipe", new LambdaParselet());
     this.register_prefix("Number", new NumberParselet());
     this.register_prefix("LeftArrow", new ChannelReceive());
     this.register_prefix("Identifier", new IdentifierParselet());

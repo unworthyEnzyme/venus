@@ -1,4 +1,4 @@
-let sender = fun(message_channel) {
+let sender = |message_channel| {
     message_channel <- 42;
 };
 let message_channel = Channel(0);

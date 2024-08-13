@@ -28,6 +28,9 @@ export class Tokenizer {
     while (!this.is_at_end(this.source)) {
       const c = this.advance();
       switch (c) {
+        case "|":
+          this.tokens.push({ type: "Pipe", lexeme: c });
+          break;
         case ":":
           this.tokens.push({ type: "Colon", lexeme: c });
           break;
