@@ -128,3 +128,6 @@ We only support reading and writing to the stdio.
 let input = prompt("Enter a message: ")
 print input;
 ```
+
+## References
+- [Implementing Co](https://abhinavsarkar.net/posts/implementing-co-1/): I highly recommend this blog post. It's an excellent read. I used it to understand the concepts more and the example at `/examples/coroutines.vs` is taken from this blog post.
