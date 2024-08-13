@@ -35,9 +35,9 @@ export class VM {
       ),
     );
     this.globals.set(
-      "new_channel",
+      "Channel",
       new NativeFunction(
-        "new_channel",
+        "Channel",
         1,
         (capacity: Value) => {
           if (!(capacity instanceof NumberValue)) {
