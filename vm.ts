@@ -117,7 +117,9 @@ export class VM {
             if (!(a instanceof NumberValue) || !(b instanceof NumberValue)) {
               throw new Error("Expected number");
             }
-            this.current_fiber.value_stack.push(new BooleanValue(a <= b));
+            this.current_fiber.value_stack.push(
+              new BooleanValue(a.value <= b.value),
+            );
             break;
           }
           case "AccessProperty": {
@@ -228,7 +230,9 @@ export class VM {
             if (!(a instanceof NumberValue) || !(b instanceof NumberValue)) {
               throw new Error("Expected number");
             }
-            this.current_fiber.value_stack.push(new BooleanValue(a > b));
+            this.current_fiber.value_stack.push(
+              new BooleanValue(a.value > b.value),
+            );
             break;
           }
           case "Return": {
