@@ -140,6 +140,22 @@ export class Block extends Statement {
   }
 }
 
+export class FunctionDeclaration extends Statement {
+  constructor(
+    public name: string,
+    public parameters: string[],
+    public body: Statement[],
+  ) {
+    super();
+  }
+
+  toString() {
+    return `fun ${this.name}(${this.parameters.join(", ")}) {
+  ${this.body.join("; ")}
+}`;
+  }
+}
+
 export class If extends Statement {
   constructor(
     public condition: Expression,

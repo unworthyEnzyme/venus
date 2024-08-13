@@ -16,6 +16,9 @@ export type Instruction =
   | { type: "GetLocal"; name: string }
   | { type: "SetLocal"; name: string }
   | { type: "DeclareLocal"; name: string }
+  | { type: "GetGlobal"; name: string }
+  | { type: "SetGlobal"; name: string }
+  | { type: "DeclareGlobal"; name: string }
   | { type: "BlockEnd" }
   | { type: "BlockStart" }
   | { type: "Return" }

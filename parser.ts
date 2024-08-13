@@ -59,6 +59,18 @@ export class Parser {
   }
 
   parse_statement(): Statement {
+    if (this.match("Fun")) {
+      const name = this.consume("Identifier").lexeme;
+      this.consume("LeftParen");
+      const parameters = this.parse_delimited(
+        "Comma",
+        "RightParen",
+        () => this.consume("Identifier").lexeme,
+      );
+      this.consume("LeftBrace");
+      const body = this.parse_block();
+      return builder.function_declaration(name, parameters, body);
+    }
     if (this.match("LeftBrace")) {
       return builder.block(this.parse_block());
     }

@@ -67,13 +67,37 @@ export class VM {
         }
         const instruction = frame.instructions[frame.ip++];
         switch (instruction.type) {
+          case "DeclareGlobal": {
+            this.globals.set(instruction.name, new Nil());
+            break;
+          }
+          case "SetGlobal": {
+            const value = this.current_fiber.value_stack.pop();
+            if (value === undefined) {
+              throw new Error("Expected value");
+            }
+            this.globals.set(instruction.name, value);
+            break;
+          }
+          case "GetGlobal": {
+            const value = this.globals.get(instruction.name);
+            if (value === undefined) {
+              throw new Error(
+                `Undefined global variable ${instruction.name}`,
+              );
+            }
+            this.current_fiber.value_stack.push(value);
+            break;
+          }
           case "GreaterThanEqual": {
             const b = this.current_fiber.value_stack.pop();
             const a = this.current_fiber.value_stack.pop();
             if (!(a instanceof NumberValue) || !(b instanceof NumberValue)) {
               throw new Error("Expected number");
             }
-            this.current_fiber.value_stack.push(new BooleanValue(a >= b));
+            this.current_fiber.value_stack.push(
+              new BooleanValue(a.value >= b.value),
+            );
             break;
           }
           case "LessThanEqual": {

@@ -8,6 +8,7 @@ import {
   ChannelSend,
   Expression,
   ExpressionStatement,
+  FunctionDeclaration,
   Identifier,
   If,
   Lambda,
@@ -142,4 +143,12 @@ export function boolean(value: boolean): BooleanLiteral {
 
 export function block(statements: Statement[]): Block {
   return new Block(statements);
+}
+
+export function function_declaration(
+  name: string,
+  parameters: string[],
+  body: Statement[],
+): FunctionDeclaration {
+  return new FunctionDeclaration(name, parameters, body);
 }

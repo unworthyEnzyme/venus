@@ -106,6 +106,16 @@ export class Compiler {
         });
       } else if (statement instanceof ast.Yield) {
         instructions.push({ type: "Yield" });
+      } else if (statement instanceof ast.FunctionDeclaration) {
+        const body = this.compile(statement.body);
+        instructions.push({
+          type: "Push",
+          value: new FunctionValue(statement.parameters, body),
+        });
+        instructions.push({
+          type: "SetGlobal",
+          name: statement.name,
+        });
       }
     }
     return instructions;
