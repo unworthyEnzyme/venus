@@ -1,4 +1,4 @@
-statement = 
+statement =
     | print_statement
     | assignment_statement
     | variable_declaration_statement
@@ -21,7 +21,7 @@ return_statement = "return" expression
 block_statement = "{" (statement ';')* "}"
 channel_send_statement = expression "<-" expression
 
-expression = 
+expression =
     | NUMBER
     | STRING
     | IDENTIFIER
@@ -34,8 +34,8 @@ expression =
 
 object_literal_expression = "{" (IDENTIFIER ":" expression ',')* (IDENTIFIER ":" expression)? "}"
 member_access_expression = expression "." IDENTIFIER
-    
-binary_expression = 
+
+binary_expression =
     | expression "+" expression
     | expression "-" expression
     | expression "*" expression
@@ -46,5 +46,5 @@ binary_expression =
     | expression ">" expression
 
 call_expression = expression "(" (expression ',')* expression? ")"
-lambda_expression = "fun" "(" (identifier ',')* identifier? ")" block_statement
+lambda_expression = "|" (identifier ',')* identifier? "|" block_statement
 channel_receive_expression = "<-" expression
