@@ -95,7 +95,7 @@ Deno.test("parser_test", async (t) => {
         );
       });
       await t.step("lambda", () => {
-        const source = "fun (x) { x + 1; }";
+        const source = "|x| { x + 1; }"; // Changed from "fun (x) { x + 1; }"
         const parser = new Parser();
         const result = parser.parse_expression_from_source(source);
         assertEquals(
