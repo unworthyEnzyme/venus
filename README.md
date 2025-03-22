@@ -9,7 +9,7 @@ A language with go style coroutines and channels.
 ## Sneak peek
 
 ```
-let print_numbers = fun(start, end) {
+let print_numbers = |start, end| {
     let i = start;
     while i < end + 1 {
         print i;
@@ -61,10 +61,12 @@ while true {
 
 ### Functions
 
-There are two ways of defining a function, one is globally visible and a statement:
+There are two ways of defining a function:
+
+Using the `fun` keyword:
 
 ```
-function fib(n) {
+fun fib(n) {
     if n < 2 {
         return n;
     } else {
@@ -73,7 +75,7 @@ function fib(n) {
 }
 ```
 
-Another is an expression and anonymous:
+Or using lambda syntax with pipes:
 
 ```
 let lambda = |x| {
@@ -130,4 +132,5 @@ print input;
 ```
 
 ## References
-- [Implementing Co](https://abhinavsarkar.net/posts/implementing-co-1/): I highly recommend this blog post. It's an excellent read. I used it to understand the concepts more and the example at `/examples/coroutines.vs` is taken from this blog post.
+
+-   [Implementing Co](https://abhinavsarkar.net/posts/implementing-co-1/): I highly recommend this blog post. It's an excellent read. I used it to understand the concepts more and the example at `/examples/coroutines.vs` is taken from this blog post.
